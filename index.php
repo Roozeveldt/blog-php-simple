@@ -1,5 +1,8 @@
 <?php
 
+// устанавливаем часовой пояс по умолчанию
+date_default_timezone_set('Asia/Novosibirsk'); // echo date_default_timezone_get() . ' => ' . date('e') . ' => ' . date('T');
+
 $posts = [
     [
         "heading" => "Цитата",
@@ -52,7 +55,7 @@ $posts = [
  * @param integer $max_length
  * @return string Обрезанный до указанной длины текст
  */
-function sliceText($text, $max_length = 300)
+function sliceText($text, $max_length = 300): string
 {
     if (strlen($text) <= $max_length) {
         $text = "<p>" . $text . "</p>";
@@ -71,6 +74,135 @@ function sliceText($text, $max_length = 300)
     }
 
     return $text;
+}
+
+/**
+ * Эмуляция разных дат для постов
+ *
+ * @param $index - Индекс записи в массиве $posts
+ * @return false|string
+ */
+function generate_random_date($index)
+{
+    $deltas = [
+        ['minutes' => 59],
+        ['hours' => 23],
+        ['days' => 6],
+        ['weeks' => 4],
+        ['months' => 11]
+    ];
+    $dcnt = count($deltas);
+
+    if ($index < 0) {
+        $index = 0;
+    }
+
+    if ($index >= $dcnt) {
+        $index = $dcnt - 1;
+    }
+
+    $delta = $deltas[$index];
+    $timeval = rand(1, current($delta));
+    $timename = key($delta);
+
+    $ts = strtotime("$timeval $timename ago");
+    $dt = date('Y-m-d H:i:s', $ts);
+
+    return $dt;
+}
+
+/**
+ * Получает относительное время между текущим моментом и предыдущим моментом
+ *
+ * @param string $post_date Дата в виде "2019-11-12 04:05:00"
+ * @return string Строка в виде "15 минут назад" или "2 часа назад"
+ */
+function getRelativePostDate(string $post_date): string
+{
+    $cur_tstmp = strtotime('now');
+    $post_tstmp = strtotime($post_date);
+    $diff = $cur_tstmp - $post_tstmp;
+
+    switch ($diff) {
+
+        // минуты - если до текущего времени прошло меньше 60 минут, то формат будет вида «% минут назад»
+        case ($diff < (60 * 60)) :
+            $time = round($diff / 60);
+            $str = get_noun_plural_form($time, 'минута', 'минуты', 'минут');
+            break;
+
+        // часы - если до текущего времени прошло больше 60 минут, но меньше 24 часов, то формат будет вида «% часов назад»
+        case ($diff >= 3600 && $diff < (24 * 3600)) :
+            $time = round($diff / (60 * 60));
+            $str = get_noun_plural_form($time, 'час', 'часа', 'часов');
+            break;
+
+        // дни - если до текущего времени прошло больше 24 часов, но меньше 7 дней, то формат будет вида «% дней назад»
+        case ($diff >= (24 * 3600) && $diff < (24 * 3600 * 7)) :
+            $time = round($diff / (60 * 60 * 24));
+            $str = get_noun_plural_form($time, 'день', 'дня', 'дней');
+            break;
+
+        // недели - если до текущего времени прошло больше 7 дней, но меньше 5 недель, то формат будет вида «% недель назад»
+        case ($diff >= (24 * 3600 * 7) && $diff < (24 * 3600 * 7 * 5)) :
+            $time = round($diff / (60 * 60 * 24 * 7));
+            $str = get_noun_plural_form($time, 'неделя', 'недели', 'недель');
+            break;
+
+        // месяцы - если до текущего времени прошло больше 5 недель, то формат будет вида «% месяцев назад»
+        default :
+            $time = round($diff / 2629746);
+            $str = get_noun_plural_form($time, 'месяц', 'месяца', 'месяцев');
+            break;
+    }
+
+    return $time . " " . $str . " назад";
+}
+
+/**
+ * Возвращает корректную форму множественного числа
+ * Ограничения: только для целых чисел
+ *
+ * Пример использования:
+ * $remaining_minutes = 5;
+ * echo "Я поставил таймер на {$remaining_minutes} " .
+ *     get_noun_plural_form(
+ *         $remaining_minutes,
+ *         'минута',
+ *         'минуты',
+ *         'минут'
+ *     );
+ * Результат: "Я поставил таймер на 5 минут"
+ *
+ * @param int $number Число, по которому вычисляем форму множественного числа
+ * @param string $one Форма единственного числа: яблоко, час, минута
+ * @param string $two Форма множественного числа для 2, 3, 4: яблока, часа, минуты
+ * @param string $many Форма множественного числа для остальных чисел
+ *
+ * @return string Рассчитанная форма множественнго числа
+ */
+function get_noun_plural_form(int $number, string $one, string $two, string $many): string
+{
+    $number = (int)$number;
+    $mod10 = $number % 10;
+    $mod100 = $number % 100;
+
+    switch (true) {
+        case ($mod100 >= 11 && $mod100 <= 20):
+            return $many;
+
+        case ($mod10 > 5):
+            return $many;
+
+        case ($mod10 === 1):
+            return $one;
+
+        case ($mod10 >= 2 && $mod10 <= 4):
+            return $two;
+
+        default:
+            return $many;
+    }
 }
 
 /**
