@@ -1,52 +1,74 @@
 <?php
 
 // устанавливаем часовой пояс по умолчанию
-date_default_timezone_set('Asia/Novosibirsk'); // echo date_default_timezone_get() . ' => ' . date('e') . ' => ' . date('T');
+date_default_timezone_set('Asia/Novosibirsk');
 
-$posts = [
-    [
-        "heading" => "Цитата",
-        "type" => "post-quote",
-        "content" => "Мы в жизни любим только раз, а после ищем лишь похожих",
-        "user_name" => "Лариса",
-        "userpic" => "userpic-larisa-small.jpg"
-    ],
-    [
-        "heading" => "Игра престолов",
-        "type" => "post-text",
-        "content" => "Не могу дождаться начала финального сезона своего любимого сериала!",
-        "user_name" => "Владик",
-        "userpic" => "userpic.jpg"
-    ],
-    [
-        "heading" => "Наконец, обработал фотки!",
-        "type" => "post-photo",
-        "content" => "rock-medium.jpg",
-        "user_name" => "Владик",
-        "userpic" => "userpic-mark.jpg"
-    ],
-    [
-        "heading" => "Моя мечта",
-        "type" => "post-photo",
-        "content" => "coast-medium.jpg",
-        "user_name" => "Лариса",
-        "userpic" => "userpic-larisa-small.jpg"
-    ],
-    [
-        "heading" => "Лучшие курсы",
-        "type" => "post-link",
-        "content" => "www.htmlacademy.ru",
-        "user_name" => "Владик",
-        "userpic" => "userpic.jpg"
-    ],
-    [
-        "heading" => "Полезный пост про Байкал",
-        "type" => "post-text",
-        "content" => "Озеро Байкал – огромное древнее озеро в горах Сибири к северу от монгольской границы. Байкал считается самым глубоким озером в мире. Он окружен сетью пешеходных маршрутов, называемых Большой байкальской тропой. Деревня Листвянка, расположенная на западном берегу озера, – популярная отправная точка для летних экскурсий. Зимой здесь можно кататься на коньках и собачьих упряжках.",
-        "user_name" => "Лариса Роговая",
-        "userpic" => "userpic-larisa-small.jpg"
-    ],
-];
+// количество постов на странице
+$posts_per_page = 6;
+
+// Подключение к базе данных
+const DB_HOST = "127.0.0.1";
+const DB_USER = "root";
+const DB_PASS = "root_password";
+const DB_NAME = "readme";
+
+$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+if ($conn) {
+    mysqli_set_charset($conn, "utf8");
+
+    // список проектов для текущего пользователя
+    $sql = "SELECT id, name, type FROM types";
+    $result = mysqli_query($conn, $sql);
+    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    $types = [];
+    foreach ($rows as $row) {
+        $types[] = $row;
+    }
+
+    // список задач у текущего пользователя
+    // TODO: объединить посты с пользователями
+    $sql = "SELECT
+                posts.id AS post_id,
+                heading,
+                content,
+                reposts_count,
+                likes_count,
+                login,
+                userpic,
+                type
+            FROM posts
+            JOIN users ON users.id = posts.user_id
+            JOIN types ON types.id = posts.type_id
+            ORDER BY reposts_count DESC
+            LIMIT 0, $posts_per_page
+    ";
+    $result = mysqli_query($conn, $sql);
+    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    $posts = [];
+    foreach ($rows as $row) {
+        $posts[] = $row;
+    }
+
+    // Генерируем контент для главной страницы
+    $main_content = include_template('main.php', [
+        'types' => $types,
+        'posts' => $posts,
+    ]);
+
+    // Подключаем основной шаблон
+    $layout_content = include_template('layout.php', [
+        'is_auth' => rand(0, 1),
+        'user_name' => 'Марчков Вячеслав',
+        'title' => 'readme: популярное',
+        'content' => $main_content,
+    ]);
+
+    // Выводим шаблон и в нём контент главной страницы
+    print($layout_content);
+} else {
+    print("Ошибка подключения к базе данных: " . mysqli_connect_error());
+}
 
 /**
  * Обрезает текст до указанной длины (в символах)
@@ -228,19 +250,3 @@ function include_template($name, array $data = [])
 
     return $result;
 }
-
-// Генерируем контент для главной страницы
-$main_content = include_template('main.php', [
-    'posts' => $posts,
-]);
-
-// Подключаем основной шаблон
-$layout_content = include_template('layout.php', [
-    'is_auth' => rand(0, 1),
-    'user_name' => 'Марчков Вячеслав',
-    'title' => 'readme: популярное',
-    'content' => $main_content,
-]);
-
-// Выводим шаблон и в нём контент главной страницы
-print($layout_content);
