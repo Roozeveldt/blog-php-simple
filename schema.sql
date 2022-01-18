@@ -36,6 +36,38 @@ CREATE TABLE IF NOT EXISTS posts (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS `comments` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `content` TEXT NOT NULL ,
+  `user_id` INT UNSIGNED NOT NULL ,
+  `post_id` INT UNSIGNED NOT NULL ,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  PRIMARY KEY (`id`)
+  )
+  ENGINE = InnoDB
+  COMMENT = 'Текстовый комментарий, оставленный к одному из постов.'
+;
+
+CREATE TABLE IF NOT EXISTS `likes` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `user_id` INT UNSIGNED NOT NULL ,
+  `post_id` INT UNSIGNED NOT NULL ,
+  PRIMARY KEY (`id`)
+  )
+  ENGINE = InnoDB
+  COMMENT = 'Лайки, поставленные пользователями к постам.'
+;
+
+CREATE TABLE IF NOT EXISTS `subscriptions` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `subscriber_id` INT UNSIGNED NOT NULL COMMENT 'пользователь, который подписался' ,
+  `user_id` INT UNSIGNED NOT NULL COMMENT 'пользователь, на которого подписались' ,
+  PRIMARY KEY (`id`)
+  )
+  ENGINE = InnoDB
+  COMMENT = 'Подписка одним пользователем на другого.'
+;
+
 -- index on tasks name
 CREATE INDEX p_heading ON posts(heading);
 
@@ -49,3 +81,39 @@ ALTER TABLE posts
   ADD CONSTRAINT fk_user_id
   FOREIGN KEY (user_id)
   REFERENCES users (id);
+
+ALTER TABLE `comments`
+  ADD FOREIGN KEY (`user_id`)
+  REFERENCES `users`(`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+ALTER TABLE `comments`
+  ADD FOREIGN KEY (`post_id`)
+  REFERENCES `posts`(`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+ALTER TABLE `likes`
+  ADD FOREIGN KEY (`user_id`)
+  REFERENCES `users`(`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+ALTER TABLE `likes`
+  ADD FOREIGN KEY (`post_id`)
+  REFERENCES `posts`(`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+ALTER TABLE `subscriptions`
+  ADD FOREIGN KEY (`subscriber_id`)
+  REFERENCES `users`(`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+ALTER TABLE `subscriptions`
+  ADD FOREIGN KEY (`user_id`)
+  REFERENCES `users`(`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
