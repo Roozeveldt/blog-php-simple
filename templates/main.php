@@ -45,7 +45,7 @@
                     <li class="popular__filters-item filters__item">
                         <a class="filters__button filters__button--<?= $type['type']; ?> button <?php if ($type_id == $type['id']) : ?>filters__button--active<?php endif; ?>" href="?id=<?= $type['id']; ?>">
                             <span class="visually-hidden"><?= $type['name']; ?></span>
-                            <svg class="filters__icon" width="21" height="21">
+                            <svg class="filters__icon" width="24" height="24">
                                 <use xlink:href="#icon-filter-<?= $type['type']; ?>"></use>
                             </svg>
                         </a>
@@ -63,16 +63,18 @@
                             <h2><a href="post.php?id=<?= $post['id']; ?>"><?= htmlspecialchars($post['heading']); ?></a></h2>
                         </header>
                         <div class="post__main">
-                            <?php if ($post['type'] == "quote") : ?>
+
                             <!--содержимое для поста-цитаты-->
+                            <?php if ($post['type'] == "quote") : ?>
                             <blockquote>
                                 <p><?= htmlspecialchars($post['content']); ?></p>
                                 <cite><?= htmlspecialchars($post['quote_author']); ?></cite>
                             </blockquote>
-                            <?php elseif ($post['type'] == "link") : ?>
+
                             <!--содержимое для поста-ссылки-->
+                            <?php elseif ($post['type'] == "link") : ?>
                             <div class="post-link__wrapper">
-                                <a class="post-link__external" href="https://<?= htmlspecialchars($post['content']); ?>" title="Перейти по ссылке" target="_blank">
+                                <a class="post-link__external" href="<?= htmlspecialchars($post['content']); ?>" title="Перейти по ссылке" target="_blank">
                                     <div class="post-link__info-wrapper">
                                         <div class="post-link__icon-wrapper">
                                             <img src="https://www.google.com/s2/favicons?domain=<?= htmlspecialchars($post['content']); ?>" alt="Иконка">
@@ -84,28 +86,30 @@
                                     <span><?= htmlspecialchars($post['content']); ?></span>
                                 </a>
                             </div>
-                            <?php elseif ($post['type'] == "photo") : ?>
+
                             <!--содержимое для поста-фото-->
+                            <?php elseif ($post['type'] == "photo") : ?>
                             <div class="post-photo__image-wrapper">
-                                <img src="img/<?= htmlspecialchars($post['content']); ?>" alt="Фото от пользователя" width="360" height="240">
+                                <img src="uploads/<?= htmlspecialchars($post['content']); ?>" alt="<?= htmlspecialchars($post['heading']); ?>" width="360" height="240">
                             </div>
-                            <?php elseif ($post['type'] == "video") : ?>
+
                             <!--содержимое для поста-видео-->
+                            <?php elseif ($post['type'] == "video") : ?>
                             <div class="post-video__block">
                                 <div class="post-video__preview">
-                                    <!-- embed_youtube_cover/* вставьте ссылку на видео */ -->
-                                    <img src="img/coast-medium.jpg" alt="Превью к видео" width="360" height="188">
+                                    <?= embed_youtube_cover(htmlspecialchars($post['content'])); ?>
                                 </div>
-                                <a href="post-details.html" class="post-video__play-big button">
+                                <a href="post.php?id=<?= $post['id']; ?>" class="post-video__play-big button">
                                     <svg class="post-video__play-big-icon" width="14" height="14">
                                         <use xlink:href="#icon-video-play-big"></use>
                                     </svg>
                                     <span class="visually-hidden">Запустить проигрыватель</span>
                                 </a>
                             </div>
-                            <?php elseif ($post['type'] == "text") : ?>
+
                             <!--содержимое для поста-текста-->
-                            <?= sliceText(htmlspecialchars($post['content']), $post['id'], 200); ?>
+                            <?php elseif ($post['type'] == "text") : ?>
+                                <?= sliceText(htmlspecialchars($post['content']), $post['id'], 200); ?>
                             <?php endif; ?>
                         </div>
                         <footer class="post__footer">

@@ -62,6 +62,7 @@ if (!$post) {
             break;
         case 'photo':
             $post_content = include_template('post-photo.php', [
+                'alt' => $post['heading'],
                 'img_url' => $post['content'],
             ]);
             break;

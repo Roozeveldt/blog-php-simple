@@ -33,7 +33,11 @@ function check_youtube_url($youtube_url)
     $id = extract_youtube_id($youtube_url);
 
     if ($id) {
-        $api_data = ['id' => $id, 'part' => 'id,status', 'key' => 'AIzaSyBN-AXBnCPxO3HJfZZdZEHMybVfIgt16PQ'];
+        $api_data = [
+            'id' => $id,
+            'part' => 'id,status',
+            'key' => 'AIzaSyAfKT2Ze2bVv5KtjJLOEZm0ed_j3UxLB3U',
+        ];
         $url = "https://www.googleapis.com/youtube/v3/videos?" . http_build_query($api_data);
 
         $resp = file_get_contents($url);
@@ -76,7 +80,7 @@ function embed_youtube_cover($youtube_url)
 
     if ($id) {
         $src = sprintf("https://img.youtube.com/vi/%s/mqdefault.jpg", $id);
-        $res = '<img alt="youtube cover" width="320" height="120" src="' . $src . '" />';
+        $res = '<img alt="youtube cover" width="360" height="188" src="' . $src . '" />';
     }
 
     return $res;
@@ -94,7 +98,7 @@ function extract_youtube_id($youtube_url)
     $parts = parse_url($youtube_url);
 
     if ($parts) {
-        if ($parts['path'] == '/watch') {
+        if (isset($parts['path']) && $parts['path'] == '/watch') {
             parse_str($parts['query'], $vars);
             $id = $vars['v'] ?? null;
         } else {
@@ -157,31 +161,31 @@ function getRelativePostDate(string $post_date): string
     switch ($diff) {
 
         // минуты - если до текущего времени прошло меньше 60 минут, то формат будет вида «% минут назад»
-        case ($diff < (60 * 60)) :
+        case ($diff < (60 * 60)):
             $time = round($diff / 60);
             $str = get_noun_plural_form($time, 'минута', 'минуты', 'минут');
             break;
 
         // часы - если до текущего времени прошло больше 60 минут, но меньше 24 часов, то формат будет вида «% часов назад»
-        case ($diff >= 3600 && $diff < (24 * 3600)) :
+        case ($diff >= 3600 && $diff < (24 * 3600)):
             $time = round($diff / (60 * 60));
             $str = get_noun_plural_form($time, 'час', 'часа', 'часов');
             break;
 
         // дни - если до текущего времени прошло больше 24 часов, но меньше 7 дней, то формат будет вида «% дней назад»
-        case ($diff >= (24 * 3600) && $diff < (24 * 3600 * 7)) :
+        case ($diff >= (24 * 3600) && $diff < (24 * 3600 * 7)):
             $time = round($diff / (60 * 60 * 24));
             $str = get_noun_plural_form($time, 'день', 'дня', 'дней');
             break;
 
         // недели - если до текущего времени прошло больше 7 дней, но меньше 5 недель, то формат будет вида «% недель назад»
-        case ($diff >= (24 * 3600 * 7) && $diff < (24 * 3600 * 7 * 5)) :
+        case ($diff >= (24 * 3600 * 7) && $diff < (24 * 3600 * 7 * 5)):
             $time = round($diff / (60 * 60 * 24 * 7));
             $str = get_noun_plural_form($time, 'неделя', 'недели', 'недель');
             break;
 
         // месяцы - если до текущего времени прошло больше 5 недель, то формат будет вида «% месяцев назад»
-        default :
+        default:
             $time = round($diff / 2629746);
             $str = get_noun_plural_form($time, 'месяц', 'месяца', 'месяцев');
             break;
@@ -337,7 +341,7 @@ function sliceText($text, $id, $max_length = 300): string
         $arr = explode(" ", $text);
         $length = 0;
         $arr_text = [];
-        foreach($arr as $key => $value) {
+        foreach ($arr as $key => $value) {
             $length += mb_strlen($value, 'UTF-8');
             $arr_text[] = $value;
             if ($length >= $max_length) {
@@ -409,4 +413,678 @@ function displaySubscribersCount(int $count) : string
         'подписчика',
         'подписчиков'
     );
+}
+
+/**
+ * Получает значение из поля input массива POST для вывода в процессе валидации
+ *
+ * @param string $name
+ * @return string|null
+ */
+function getPostVal($name)
+{
+    return !empty($_POST[$name]) ? h($_POST[$name]) : "";
+}
+
+/**
+ * Очищает введенные в поля данные
+ *
+ * @param string $string
+ * @return string
+ */
+function h($string)
+{
+    return htmlspecialchars(trim($string));
+}
+
+/**
+ * Валидирует формат загруженного файла
+ *
+ * @param array $file
+ * @return bool
+ */
+function check_uploaded_file_format(string $name) : bool
+{
+    $file = $_FILES[$name];
+
+    $allowed_types = [
+        'image/gif',
+        'image/png',
+        'image/jpeg',
+    ];
+
+    $file_name = $file['name'];
+    $file_ext = explode('.', $file_name);
+    $file_ext = strtolower(end($file_ext)); // jpg
+    $file_tmp_name = $file['tmp_name'];
+    $type = mime_content_type($file_tmp_name);
+
+    if (!in_array($type, $allowed_types)) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Валидирует размер загружаемого файла
+ *
+ * @param string $name
+ * @param int $allowed_max_size
+ * @return boolean
+ */
+function check_uploaded_file_size(string $name, $allowed_max_size) : bool
+{
+    $file = $_FILES[$name];
+
+    $file_size = $file['size'];
+
+    if ($file_size > $allowed_max_size) {
+        return false;
+    }
+
+    return true;
+}
+
+function handle_uploaded_file($file)
+{
+    $file_name = $file['name'];
+    $file_ext = explode('.', $file_name);
+    $file_ext = strtolower(end($file_ext));
+    $file_tmp_name = $file['tmp_name'];
+    $file_new_name = uniqid() . '.' . $file_ext;
+    $path = __DIR__ . '/uploads/';
+
+    return (@move_uploaded_file($file_tmp_name, $path . $file_new_name))
+        ? $file_new_name
+        : false;
+}
+
+function handle_attached_file($img_url)
+{
+    $path = __DIR__ . '/uploads/';
+    $file_ext = explode('.', $img_url);
+    $file_ext = strtolower(end($file_ext));
+    $file_new_name = uniqid() . '.' . $file_ext;
+
+    $image = file_get_contents($img_url);
+	file_put_contents($path . $file_new_name, $image);
+
+    return $file_new_name;
+}
+
+function check_attached_file_format(string $img_url) : bool
+{
+    $allowed_types = [
+        'gif',
+        'png',
+        'jpeg',
+        'jpg',
+    ];
+
+    $file_ext = explode('.', $img_url);
+    $file_ext = strtolower(end($file_ext));
+
+    if (!in_array($file_ext, $allowed_types)) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Валидирует данные из форм, переданные через массив $_POST
+ *
+ * @param array $post
+ * @return array|void Массив с ошибками либо пустой массив
+ */
+function validate_post_form($post, $rules)
+{
+    $errors = [];
+
+    foreach ($post as $key => $value) {
+        if (isset($rules[$key])) {
+            $rule = $rules[$key];
+            $errors[$key] = $rule();
+        }
+    }
+
+    return array_filter($errors);
+}
+
+/**
+ * Валидирует поле формы добавления поста-картинки,
+ * переданное через массив $_POST и присваивает сообщения об ошибке
+ *
+ * @param string $name
+ * @return string
+ */
+function validate_photo_field($name)
+{
+    $allowed_max_size = 1 * 1024 * 1024; // 1048576 байт = 1Мб
+
+    $messages = [
+        'photo-heading' => [
+            'required' => [
+                'Заголовок поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'photo-url' => [
+            'required' => [
+                'Ссылка на фото',
+                'Введите ссылку на любое фото из сети или загрузите фото весом не более ' . ($allowed_max_size / (1024 * 1024)) . ' Мб.',
+            ],
+            'wrong-format' => [
+                'Неверный формат',
+                'Загружаемый файл должен иметь формат GIF, JPG или PNG',
+            ],
+            'wrong-size' => [
+                'Превышен размер',
+                'Максимальный размер файла: ' . ($allowed_max_size / (1024 * 1024)) . ' Мб',
+            ],
+            'is_not_valid_url' => [
+                'Неверный формат',
+                'Ссылка должна иметь вид https:// и т.д.',
+            ],
+            'file_not_found' => [
+                'Файл не найден',
+                'Ссылка на файл указана некорректно.',
+            ],
+        ],
+        'photo-tags' => [
+            'required' => [
+                'Теги для поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name]) && $name != 'photo-url') {
+        return $messages[$name]['required'];
+    }
+
+    if ($name == 'photo-url') {
+        if (fileUploaded('photo-file')) {
+            if (!check_uploaded_file_format('photo-file')) {
+                return $messages[$name]['wrong-format'];
+            }
+            if (!check_uploaded_file_size('photo-file', $allowed_max_size)) {
+                return $messages[$name]['wrong-size'];
+            }
+        } else {
+            if (empty($_POST[$name])) {
+                return $messages[$name]['required'];
+            }
+            if (!validate_url($_POST[$name])) {
+                return $messages[$name]['is_not_valid_url'];
+            }
+            if (!check_attached_file_format($_POST[$name])) {
+                return $messages[$name]['wrong-format'];
+            }
+            if (!is_file_exists($_POST[$name])) {
+                return $messages[$name]['file_not_found'];
+            }
+        }
+    }
+}
+
+function validate_video_field($name)
+{
+    $messages = [
+        'video-heading' => [
+            'required' => [
+                'Заголовок видео-поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'video-url' => [
+            'required' => [
+                'Ссылка на YouTube',
+                'Это поле должно быть заполнено.',
+            ],
+            'is_not_valid_url' => [
+                'Неверный формат',
+                'Ссылка должна иметь вид https:// и т.д.',
+            ],
+            'video_not_exists' => [
+                'Видео не найдено',
+                'По этой ссылке не найдено видео на YouTube.',
+            ],
+        ],
+        'video-tags' => [
+            'required' => [
+                'Теги для поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+
+    if ($name == 'video-url') {
+        if (!validate_url($_POST[$name])) {
+            return $messages[$name]['is_not_valid_url'];
+        }
+        if (!check_youtube_url($_POST[$name])) {
+            return $messages[$name]['video_not_exists'];
+        }
+    }
+}
+
+function validate_text_field($name)
+{
+    $messages = [
+        'text-heading' => [
+            'required' => [
+                'Заголовок поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'text-content' => [
+            'required' => [
+                'Текст публикации',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'text-tags' => [
+            'required' => [
+                'Теги для поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+}
+
+function validate_quote_field($name)
+{
+    $messages = [
+        'quote-heading' => [
+            'required' => [
+                'Заголовок цитаты',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'quote-content' => [
+            'required' => [
+                'Текст цитаты',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'quote-author' => [
+            'required' => [
+                'Автор цитаты',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'quote-tags' => [
+            'required' => [
+                'Теги для поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+}
+
+function validate_link_field($name)
+{
+    $messages = [
+        'link-heading' => [
+            'required' => [
+                'Заголовок ссылки',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'link-url' => [
+            'required' => [
+                'Ссылка на ресурс',
+                'Это поле должно быть заполнено.',
+            ],
+            'is_not_valid_url' => [
+                'Неверный формат',
+                'Ссылка должна иметь вид https:// и т.д.',
+            ],
+        ],
+        'link-tags' => [
+            'required' => [
+                'Теги для поста',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+
+    if ($name == 'link-url') {
+        if (!validate_url($_POST[$name])) {
+            return $messages[$name]['is_not_valid_url'];
+        }
+    }
+}
+
+function fileUploaded($name)
+{
+    if (empty($_FILES)) {
+        return false;
+    }
+    $file = $_FILES[$name];
+    if (!file_exists($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Проверяет, является ли ссылка валидной ссылкой
+ *
+ * @param string $str
+ * @return bool
+ */
+function validate_url($str) : bool
+{
+    return filter_var(strtolower(trim($str)), FILTER_VALIDATE_URL);
+}
+
+function is_file_exists($img_url)
+{
+    $headers = get_headers($img_url);
+
+    return (preg_match("|200|", $headers[0])) ? true : false;
+}
+
+/**
+ * Превращает строку тегов в массив
+ *
+ * @param string $tags
+ * @return array
+ */
+function process_tags(string $tags) : array
+{
+    return array_filter(explode(' ', $tags));
+}
+
+/**
+ * Вставляет теги в таблицу тегов БД
+ *
+ * @param mysqli $conn
+ * @param array $tags
+ * @param integer $post_id
+ * @return string
+ */
+function insert_tags_into_db($conn, array $tags, int $post_id) : string
+{
+    $ids = '';
+    foreach ($tags as $k => $v) {
+        $v = mb_strtolower($v);
+        $sql = "INSERT INTO tags (
+                    name,
+                    post_id
+                ) VALUES (?, ?)";
+
+        $stmt = db_get_prepare_stmt($conn, $sql, [$v, $post_id]);
+        mysqli_stmt_execute($stmt);
+        $ids .= mysqli_insert_id($conn) . ',';
+    }
+
+    return rtrim($ids, ',');
+}
+
+/**
+ * Вставляет теги в пост
+ *
+ * @param mysqli $conn
+ * @param string $value
+ * @param integer $id
+ * @return void
+ */
+function update_post_tags($conn, string $value, int $id)
+{
+    $sql = "UPDATE posts SET tag_ids = ? WHERE id = ?";
+    $stmt = db_get_prepare_stmt($conn, $sql, [$value, $id]);
+    mysqli_stmt_execute($stmt);
+
+    return mysqli_stmt_affected_rows($stmt);
+}
+
+/**
+ * Добавляет новый лот в базу данных
+ *
+ * @param mysqli $conn
+ * @param array $post
+ * @param string $image
+ * @return int Возвращает ID добавленной записи
+ */
+function insert_photo_post_into_db($conn, $post, $image)
+{
+    $data = [
+        'heading'   => h($post['photo-heading']),
+        'user_id'   => 5,
+        'type_id'   => (int)$post['type_id'],
+        'content'   => $image,
+    ];
+
+    $tags = process_tags(h($post['photo-tags']));
+
+    mysqli_begin_transaction($conn);
+
+    try {
+        $sql = "INSERT INTO posts (
+            heading,
+            user_id,
+            type_id,
+            content
+        ) VALUES (?, ?, ?, ?)";
+
+        $stmt = db_get_prepare_stmt($conn, $sql, $data);
+        mysqli_stmt_execute($stmt);
+
+        $post_id = mysqli_insert_id($conn);
+        $tag_ids = insert_tags_into_db($conn, $tags, $post_id);
+        update_post_tags($conn, $tag_ids, $post_id);
+
+        mysqli_commit($conn);
+
+        return $post_id;
+    } catch (mysqli_sql_exception $exception) {
+        mysqli_rollback($conn);
+
+        throw $exception;
+    }
+}
+
+/**
+ * Добавляет пост-видео в БД
+ *
+ * @param mysqli $conn
+ * @param array $post
+ * @return int|void
+ */
+function insert_video_post_into_db($conn, $post)
+{
+    $data = [
+        'heading'   => h($post['video-heading']),
+        'user_id'   => 5,
+        'type_id'   => (int)$post['type_id'],
+        'content'   => h($post['video-url']),
+    ];
+
+    $tags = process_tags(h($post['video-tags']));
+
+    mysqli_begin_transaction($conn);
+
+    try {
+        $sql = "INSERT INTO posts (
+            heading,
+            user_id,
+            type_id,
+            content
+        ) VALUES (?, ?, ?, ?)";
+
+        $stmt = db_get_prepare_stmt($conn, $sql, $data);
+        mysqli_stmt_execute($stmt);
+
+        $post_id = mysqli_insert_id($conn);
+        $tag_ids = insert_tags_into_db($conn, $tags, $post_id);
+        update_post_tags($conn, $tag_ids, $post_id);
+
+        mysqli_commit($conn);
+
+        return $post_id;
+    } catch (mysqli_sql_exception $exception) {
+        mysqli_rollback($conn);
+
+        throw $exception;
+    }
+}
+
+/**
+ * Добавляет пост-текст в БД
+ *
+ * @param mysqli $conn
+ * @param array $post
+ * @return int|void
+ */
+function insert_text_post_into_db($conn, $post)
+{
+    $data = [
+        'heading'   => h($post['text-heading']),
+        'user_id'   => 5,
+        'type_id'   => (int)$post['type_id'],
+        'content'   => h($post['text-content']),
+    ];
+
+    $tags = process_tags(h($post['text-tags']));
+
+    mysqli_begin_transaction($conn);
+
+    try {
+        $sql = "INSERT INTO posts (
+            heading,
+            user_id,
+            type_id,
+            content
+        ) VALUES (?, ?, ?, ?)";
+
+        $stmt = db_get_prepare_stmt($conn, $sql, $data);
+        mysqli_stmt_execute($stmt);
+
+        $post_id = mysqli_insert_id($conn);
+        $tag_ids = insert_tags_into_db($conn, $tags, $post_id);
+        update_post_tags($conn, $tag_ids, $post_id);
+
+        mysqli_commit($conn);
+
+        return $post_id;
+    } catch (mysqli_sql_exception $exception) {
+        mysqli_rollback($conn);
+
+        throw $exception;
+    }
+}
+
+/**
+ * Добавляет пост-цитату в БД
+ *
+ * @param mysqli $conn
+ * @param array $post
+ * @return int|void
+ */
+function insert_quote_post_into_db($conn, $post)
+{
+    $data = [
+        'heading'   => h($post['quote-heading']),
+        'user_id'   => 5,
+        'type_id'   => (int)$post['type_id'],
+        'content'   => h($post['quote-content']),
+        'quote_author' => h($post['quote-author']),
+    ];
+
+    $tags = process_tags(h($post['quote-tags']));
+
+    mysqli_begin_transaction($conn);
+
+    try {
+        $sql = "INSERT INTO posts (
+            heading,
+            user_id,
+            type_id,
+            content,
+            quote_author
+        ) VALUES (?, ?, ?, ?, ?)";
+
+        $stmt = db_get_prepare_stmt($conn, $sql, $data);
+        mysqli_stmt_execute($stmt);
+
+        $post_id = mysqli_insert_id($conn);
+        $tag_ids = insert_tags_into_db($conn, $tags, $post_id);
+        update_post_tags($conn, $tag_ids, $post_id);
+
+        mysqli_commit($conn);
+
+        return $post_id;
+    } catch (mysqli_sql_exception $exception) {
+        mysqli_rollback($conn);
+
+        throw $exception;
+    }
+}
+
+/**
+ * Добавляет пост-ссылку в БД
+ *
+ * @param mysqli $conn
+ * @param array $post
+ * @return int|void
+ */
+function insert_link_post_into_db($conn, $post)
+{
+    $data = [
+        'heading'   => h($post['link-heading']),
+        'user_id'   => 5,
+        'type_id'   => (int)$post['type_id'],
+        'content'   => h($post['link-url']),
+    ];
+
+    $tags = process_tags(h($post['link-tags']));
+
+    /* Начало транзакции */
+    mysqli_begin_transaction($conn);
+
+    try {
+        $sql = "INSERT INTO posts (
+            heading,
+            user_id,
+            type_id,
+            content
+        ) VALUES (?, ?, ?, ?)";
+
+        $stmt = db_get_prepare_stmt($conn, $sql, $data);
+        mysqli_stmt_execute($stmt);
+
+        $post_id = mysqli_insert_id($conn);
+        $tag_ids = insert_tags_into_db($conn, $tags, $post_id);
+        update_post_tags($conn, $tag_ids, $post_id);
+
+        /* Если код достигает этой точки без ошибок, фиксируем данные в базе данных. */
+        mysqli_commit($conn);
+
+        return $post_id;
+    } catch (mysqli_sql_exception $exception) {
+        mysqli_rollback($conn);
+
+        throw $exception;
+    }
 }

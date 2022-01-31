@@ -4,7 +4,7 @@ require_once('config.php');
 require_once('functions.php');
 
 // типы контента
-require_once('helpers/types.php');
+require_once('types.php');
 
 $type_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 $type_id = abs((int)$type_id);

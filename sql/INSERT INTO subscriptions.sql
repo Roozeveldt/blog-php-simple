@@ -1,0 +1,240 @@
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (94,2),
+  (16,4),
+  (71,3),
+  (35,2),
+  (88,3),
+  (21,1),
+  (88,3),
+  (78,2),
+  (35,2),
+  (93,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (110,1),
+  (63,1),
+  (110,2),
+  (100,3),
+  (71,3),
+  (52,2),
+  (28,1),
+  (30,4),
+  (64,1),
+  (69,2);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (61,1),
+  (30,3),
+  (105,2),
+  (104,2),
+  (58,3),
+  (91,2),
+  (65,1),
+  (72,3),
+  (36,2),
+  (60,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (49,2),
+  (43,2),
+  (35,3),
+  (79,1),
+  (103,2),
+  (11,3),
+  (63,2),
+  (41,2),
+  (55,2),
+  (26,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (48,2),
+  (62,3),
+  (40,1),
+  (84,2),
+  (62,1),
+  (88,3),
+  (32,3),
+  (71,1),
+  (75,3),
+  (35,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (92,4),
+  (97,2),
+  (89,2),
+  (98,4),
+  (22,3),
+  (78,3),
+  (30,3),
+  (27,3),
+  (21,3),
+  (92,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (89,1),
+  (85,2),
+  (26,1),
+  (16,4),
+  (29,3),
+  (77,2),
+  (87,3),
+  (54,1),
+  (51,2),
+  (93,2);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (18,1),
+  (7,4),
+  (35,4),
+  (25,1),
+  (66,1),
+  (33,3),
+  (109,2),
+  (106,4),
+  (38,2),
+  (26,2);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (100,3),
+  (101,1),
+  (47,2),
+  (60,1),
+  (75,1),
+  (66,3),
+  (60,1),
+  (76,1),
+  (50,2),
+  (28,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (45,3),
+  (49,2),
+  (50,2),
+  (42,4),
+  (36,3),
+  (41,1),
+  (73,3),
+  (16,4),
+  (109,1),
+  (71,4);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (78,2),
+  (105,3),
+  (17,2),
+  (37,4),
+  (92,3),
+  (16,4),
+  (39,3),
+  (15,3),
+  (93,2),
+  (8,2);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (15,3),
+  (108,1),
+  (12,2),
+  (53,3),
+  (17,3),
+  (27,2),
+  (107,4),
+  (93,1),
+  (63,2),
+  (52,1);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (14,3),
+  (91,3),
+  (82,3),
+  (36,3),
+  (8,4),
+  (44,4),
+  (50,1),
+  (34,3),
+  (91,4),
+  (59,4);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (34,1),
+  (14,3),
+  (8,3),
+  (31,2),
+  (21,3),
+  (56,2),
+  (45,4),
+  (6,4),
+  (67,3),
+  (107,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (60,4),
+  (91,1),
+  (11,3),
+  (100,2),
+  (36,3),
+  (17,2),
+  (20,3),
+  (53,2),
+  (89,1),
+  (47,2);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (91,3),
+  (9,2),
+  (29,3),
+  (62,1),
+  (70,1),
+  (63,3),
+  (95,2),
+  (72,2),
+  (53,2),
+  (63,1);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (33,2),
+  (25,3),
+  (19,4),
+  (80,3),
+  (19,1),
+  (62,2),
+  (86,1),
+  (101,3),
+  (13,2),
+  (47,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (100,4),
+  (11,3),
+  (39,2),
+  (69,2),
+  (50,3),
+  (107,3),
+  (23,3),
+  (55,2),
+  (67,2),
+  (46,3);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (45,2),
+  (62,2),
+  (26,3),
+  (24,3),
+  (104,3),
+  (58,2),
+  (45,3),
+  (7,3),
+  (78,4),
+  (20,1);
+INSERT INTO `subscriptions` (`subscriber_id`,`user_id`)
+VALUES
+  (72,2),
+  (20,2),
+  (36,4),
+  (74,1),
+  (88,2),
+  (96,3),
+  (70,2),
+  (9,3),
+  (69,2),
+  (15,3);

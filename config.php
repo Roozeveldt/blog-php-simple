@@ -4,7 +4,7 @@
 date_default_timezone_set('Asia/Novosibirsk');
 
 // количество постов на странице
-$posts_per_page = 6;
+$posts_per_page = 24;
 
 const PATH = 'http://readme.local';
 
