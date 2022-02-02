@@ -1,19 +1,19 @@
 <?php
 
-/* $signup_rules = [
-    'name' => function () {
-        return validate_user_field('name');
+$signup_rules = [
+    'registration-email' => function () {
+        return validate_user_field('registration-email');
     },
-    'email' => function () {
-        return validate_user_field('email');
+    'registration-login' => function () {
+        return validate_user_field('registration-login');
     },
-    'password' => function () {
-        return validate_user_field('password');
+    'registration-password' => function () {
+        return validate_user_field('registration-password');
     },
-    'message' => function () {
-        return validate_user_field('message');
+    'registration-password-repeat' => function () {
+        return validate_user_field('registration-password-repeat');
     },
-]; */
+];
 
 /* $login_rules = [
     'email' => function () {

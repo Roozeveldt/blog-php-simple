@@ -37,9 +37,14 @@ debug($post);
 if (!$post) {
     $main_content = include_template('404.php');
     $layout_content = include_template('layout.php', [
-        http_response_code(404),
-        'title' => "readme: Пост не найден",
+        'header' => include_template('header.php', [
+            http_response_code(404),
+            'title' => "readme: Пост не найден",
+            'is_auth' => rand(0, 1),
+            'user_name' => 'Марчков Вячеслав',
+        ]),
         'content' => $main_content,
+        'footer' => include_template('footer.php'),
     ]);
 } else {
     switch ($post['type']) {
@@ -82,10 +87,13 @@ if (!$post) {
     ]);
 
     $layout_content = include_template('layout.php', [
-        'is_auth' => rand(0, 1),
-        'user_name' => 'Марчков Вячеслав',
-        'title' => 'readme: ' . $post['heading'],
+        'header' => include_template('header.php', [
+            'is_auth' => rand(0, 1),
+            'user_name' => 'Марчков Вячеслав',
+            'title' => 'readme: ' . $post['heading'],
+        ]),
         'content' => $main_content,
+        'footer' => include_template('footer.php'),
     ]);
 }
 

@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $type = h($_POST['type']);
+    $file = array_key_first($_FILES);
 
     switch ($type) {
         case 'photo':
@@ -51,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($errors)) {
         switch ($type) {
             case 'photo':
-                $image = (is_uploaded_file($_FILES['photo-file']['tmp_name']))
-                    ? handle_uploaded_file($_FILES['photo-file'])
+                $image = (is_uploaded_file($_FILES[$file]['tmp_name']))
+                    ? handle_uploaded_file($_FILES[$file])
                     : handle_attached_file(h($_POST['photo-url']));
                 $last_id = insert_photo_post_into_db($conn, $_POST, $image);
                 break;
@@ -78,17 +79,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 $main_content = include_template('add-post.php', [
-    'types' => $types,
     'type' => $type,
+    'types' => $types,
     'errors' => isset($errors) ? $errors : [],
     'getPostVal' => isset($getPostVal) ? $getPostVal : [],
 ]);
 
 $layout_content = include_template('layout.php', [
-    'is_auth' => rand(0, 1),
-    'user_name' => 'Марчков Вячеслав',
-    'title' => 'readme: Создание новой публикации',
+    'header' => include_template('header.php', [
+        'is_auth' => rand(0, 1),
+        'user_name' => 'Марчков Вячеслав',
+        'title' => 'readme: Создание новой публикации',
+    ]),
     'content' => $main_content,
+    'footer' => include_template('footer.php'),
 ]);
 
 print($layout_content);

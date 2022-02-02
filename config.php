@@ -7,6 +7,7 @@ date_default_timezone_set('Asia/Novosibirsk');
 $posts_per_page = 24;
 
 const PATH = 'http://readme.local';
+const DEFAULT_AVATAR = 'userpic-big.jpg';
 
 // Подключение к базе данных
 const DB_HOST = "127.0.0.1";

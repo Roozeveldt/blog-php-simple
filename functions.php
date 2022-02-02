@@ -486,14 +486,14 @@ function check_uploaded_file_size(string $name, $allowed_max_size) : bool
     return true;
 }
 
-function handle_uploaded_file($file)
+function handle_uploaded_file($file, $avatar = false)
 {
     $file_name = $file['name'];
     $file_ext = explode('.', $file_name);
     $file_ext = strtolower(end($file_ext));
     $file_tmp_name = $file['tmp_name'];
     $file_new_name = uniqid() . '.' . $file_ext;
-    $path = __DIR__ . '/uploads/';
+    $path = (!$avatar) ? __DIR__ . '/uploads/' : __DIR__ . '/uploads/userpic/';
 
     return (@move_uploaded_file($file_tmp_name, $path . $file_new_name))
         ? $file_new_name
@@ -774,6 +774,105 @@ function validate_link_field($name)
     }
 }
 
+/**
+ * Валидирует поле формы добавления пользователя,
+ * переданное через массив $_POST и присваивает сообщения об ошибке
+ *
+ * @param string $name
+ * @return void
+ */
+function validate_user_field($name)
+{
+    $allowed_max_size = 1 * 1024 * 1024; // 1048576 байт = 1Мб
+
+    $messages = [
+        'registration-email' => [
+            'required' => [
+                'Адрес эл.почты',
+                'Это поле должно быть заполнено.',
+            ],
+            'is_not_valid_email' => [
+                'Неверный e-mail',
+                'Введите корректный e-mail адрес.',
+            ],
+            'is_email_taken' => [
+                'Адрес e-mail занят',
+                'Этот e-mail уже занят. Используйте другой e-mail.'
+            ],
+        ],
+        'registration-login' => [
+            'required' => [
+                'Логин пользователя',
+                'Это поле должно быть заполнено.',
+            ],
+            'is_login_taken' => [
+                'Логин занят',
+                'Такой логин уже есть на блоге. Придумайте другой.'
+            ],
+        ],
+        'registration-password' => [
+            'required' => [
+                'Придумайте пароль',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+        'registration-password-repeat' => [
+            'required' => [
+                'Повтор пароля',
+                'Это поле должно быть заполнено.',
+            ],
+            'passwords_not_equal' => [
+                'Пароли не совпадают',
+                'Повтор пароля и пароль должны совпадать.',
+            ],
+        ],
+        'userpic-file' => [
+            'wrong-format' => [
+                'Неверный формат',
+                'Загружаемый файл должен иметь формат GIF, JPG или PNG',
+            ],
+            'wrong-size' => [
+                'Превышен размер',
+                'Максимальный размер файла: ' . ($allowed_max_size / (1024 * 1024)) . ' Мб',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name]) && $name != 'userpic-file') {
+        return $messages[$name]['required'];
+    }
+
+    if ($name == 'registration-email') {
+        if (!validate_email($_POST[$name])) {
+            return $messages[$name]['is_not_valid_email'];
+        }
+        if (is_email_taken($_POST[$name])) {
+            return $messages[$name]['is_email_taken'];
+        }
+    }
+
+    if ($name == 'registration-login') {
+        if (is_login_taken($_POST[$name])) {
+            return $messages[$name]['is_login_taken'];
+        }
+    }
+
+    if ($name == 'registration-password-repeat') {
+        if (!compare_passwords($_POST[$name], $_POST['registration-password'])) {
+            return $messages[$name]['passwords_not_equal'];
+        }
+    }
+
+    if ($name == 'userpic-file') {
+        if (!check_uploaded_file_format('userpic-file')) {
+            return $messages[$name]['wrong-format'];
+        }
+        if (!check_uploaded_file_size('userpic-file', $allowed_max_size)) {
+            return $messages[$name]['wrong-size'];
+        }
+    }
+}
+
 function fileUploaded($name)
 {
     if (empty($_FILES)) {
@@ -796,6 +895,50 @@ function fileUploaded($name)
 function validate_url($str) : bool
 {
     return filter_var(strtolower(trim($str)), FILTER_VALIDATE_URL);
+}
+
+/**
+ * Проверяет введенный email на соответствие формату
+ *
+ * @param string $name
+ * @return bool|string
+ */
+function validate_email($name)
+{
+    return filter_var(strtolower(trim($name)), FILTER_VALIDATE_EMAIL);
+}
+
+/**
+ * Проверяет, есть ли введенный email в базе данных
+ *
+ * @param string $email
+ * @return boolean True - если email найден в БД и False, если не найден
+ */
+function is_email_taken($email)
+{
+    global $conn;
+    $sql = "SELECT id FROM users WHERE email = ? LIMIT 1";
+
+    return selectRow($conn, $sql, [$email]) ? true : false;
+}
+
+/**
+ * Проверяет, есть ли введенный login в базе данных
+ *
+ * @param string $login
+ * @return boolean True - если login найден в БД и False, если не найден
+ */
+function is_login_taken($login)
+{
+    global $conn;
+    $sql = "SELECT id FROM users WHERE login = ? LIMIT 1";
+
+    return selectRow($conn, $sql, [$login]) ? true : false;
+}
+
+function compare_passwords(string $cpass, string $pass) : bool
+{
+    return ($cpass == $pass);
 }
 
 function is_file_exists($img_url)
@@ -1087,4 +1230,33 @@ function insert_link_post_into_db($conn, $post)
 
         throw $exception;
     }
+}
+
+/**
+ * Добавляет нового пользователя в базу данных
+ *
+ * @param mysqli $conn
+ * @param array $post
+ * @return bool
+ */
+function insert_user_into_db($conn, $post, $avatar)
+{
+    $data = [
+        'email'         => h($post['registration-email']),
+        'login'         => h($post['registration-login']),
+        'password'      => password_hash($post['registration-password'], PASSWORD_DEFAULT),
+        'userpic'       => $avatar,
+    ];
+
+    $sql = "INSERT INTO users (
+                email,
+                login,
+                password,
+                userpic
+            ) VALUES (?, ?, ?, ?)";
+
+    $stmt = db_get_prepare_stmt($conn, $sql, $data);
+    mysqli_stmt_execute($stmt);
+
+    return true;
 }
