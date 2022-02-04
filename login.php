@@ -16,18 +16,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $getPostVal[$key] = getPostVal($key);
     }
 
-    $errors = validate_post_form($_POST, $login_rules);
+    $errors = validate_post_form($_POST, $signin_rules);
 
     if (empty($errors)) {
-        $login = h($_POST['login']);
-        $sql = "SELECT id, login, email, password, userpic FROM users WHERE login = ? LIMIT 1";
-        $user = selectRow($conn, $sql, [$login]);
+        $email = h($_POST['email']);
+        $sql = "SELECT id, login, email, password, userpic FROM users WHERE email = ? LIMIT 1";
+        $user = selectRow($conn, $sql, [$email]);
 
         if (!$user) {
-            $errors['password'] = 'Вы ввели неверный логин и/или пароль';
+            $errors['password'] = [
+                'Ошибка!',
+                'Вы ввели неверный логин и/или пароль',
+            ];
         } else {
             if (!password_verify($_POST['password'], $user['password'])) {
-                $errors['password'] = 'Вы ввели неверный логин и/или пароль';
+                $errors['password'] = [
+                    'Ошибка!',
+                    'Вы ввели неверный логин и/или пароль',
+                ];
             } else {
                 foreach($user as $key => $value) {
                     if ($key != 'password') {
@@ -41,10 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-$layout_content = include_template('main.php', [
-    'title' => 'readme: Блог, каким он должен быть',
+$main_content = include_template('login.php', [
     'errors' => isset($errors) ? $errors : [],
     'getPostVal' => isset($getPostVal) ? $getPostVal : [],
+]);
+
+$layout_content = include_template('layout.php', [
+    'header' => include_template('header.php', [
+        'title' => 'readme: Авторизация',
+    ]),
+    'content' => $main_content,
     'footer' => include_template('footer.php'),
 ]);
 

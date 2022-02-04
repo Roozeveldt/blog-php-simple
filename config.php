@@ -3,6 +3,8 @@
 // устанавливаем часовой пояс по умолчанию
 date_default_timezone_set('Asia/Novosibirsk');
 
+session_start();
+
 // количество постов на странице
 $posts_per_page = 24;
 

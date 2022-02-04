@@ -3,8 +3,8 @@
 require_once "config.php";
 
 if (isset($_SESSION['user'])) {
-    http_response_code(403);
-    exit('Вы уже авторизованы на сайте!');
+    header("Location: " . PATH . '/feed.php');
+    exit();
 }
 
 require_once "functions.php";
@@ -44,7 +44,6 @@ $main_content = include_template('registration.php', [
 
 $layout_content = include_template('layout.php', [
     'header' => include_template('header.php', [
-        'is_auth' => 0,
         'title' => 'readme: Регистрация пользователя блога',
     ]),
     'content' => $main_content,

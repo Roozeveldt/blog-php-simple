@@ -873,6 +873,66 @@ function validate_user_field($name)
     }
 }
 
+/**
+ * Проверяет поля формы логина на главной странице
+ *
+ * @param string $name
+ * @return void
+ */
+function validate_login_field($name)
+{
+    $messages = [
+        'login' => [
+            'required' => 'Введите логин',
+        ],
+        'password' => [
+            'required' => 'Введите пароль',
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+}
+
+/**
+ * Проверяет поля формы логина
+ *
+ * @param string $name
+ * @return void
+ */
+function validate_signin_field($name)
+{
+    $messages = [
+        'email' => [
+            'required' => [
+                'Адрес эл.почты',
+                'Это поле должно быть заполнено.',
+            ],
+            'is_not_valid_email' => [
+                'Неверный e-mail',
+                'Введите корректный e-mail адрес.',
+            ],
+        ],
+        'password' => [
+            'required' => [
+                'Пароль для входа',
+                'Это поле должно быть заполнено.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+
+    if ($name == 'email') {
+        if (!validate_email($_POST[$name])) {
+            return $messages[$name]['is_not_valid_email'];
+        }
+    }
+}
+
 function fileUploaded($name)
 {
     if (empty($_FILES)) {

@@ -15,14 +15,23 @@ $signup_rules = [
     },
 ];
 
-/* $login_rules = [
-    'email' => function () {
-        return validate_login_field('email');
+$login_rules = [
+    'login' => function () {
+        return validate_login_field('login');
     },
     'password' => function () {
         return validate_login_field('password');
     },
-];*/
+];
+
+$signin_rules = [
+    'email' => function () {
+        return validate_signin_field('email');
+    },
+    'password' => function () {
+        return validate_signin_field('password');
+    },
+];
 
 $photo_post_rules = [
     'photo-heading' => function () {
