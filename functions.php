@@ -69,21 +69,20 @@ function embed_youtube_video($youtube_url)
 }
 
 /**
- * Возвращает img-тег с обложкой видео для вставки на страницу
+ * Возвращает аттрибут src для img-тега с обложкой видео для вставки на страницу
  * @param string $youtube_url Ссылка на youtube видео
  * @return string
  */
 function embed_youtube_cover($youtube_url)
 {
-    $res = "";
+    $src = "";
     $id = extract_youtube_id($youtube_url);
 
     if ($id) {
         $src = sprintf("https://img.youtube.com/vi/%s/mqdefault.jpg", $id);
-        $res = '<img alt="youtube cover" width="360" height="188" src="' . $src . '" />';
     }
 
-    return $res;
+    return $src;
 }
 
 /**
@@ -152,18 +151,26 @@ function generate_random_date($index)
  * @param string $post_date Дата в виде "2019-11-12 04:05:00"
  * @return string Строка в виде "15 минут назад" или "2 часа назад"
  */
-function getRelativePostDate(string $post_date): string
+function getRelativePostDate(string $post_date) : string
 {
     $cur_tstmp = strtotime('now');
     $post_tstmp = strtotime($post_date);
     $diff = $cur_tstmp - $post_tstmp;
 
+    if ($diff == 0) {
+        return 'только что';
+    }
+
     switch ($diff) {
+
+        case ($diff < 60):
+            return 'только что';
+            break;
 
         // минуты - если до текущего времени прошло меньше 60 минут, то формат будет вида «% минут назад»
         case ($diff < (60 * 60)):
             $time = round($diff / 60);
-            $str = get_noun_plural_form($time, 'минута', 'минуты', 'минут');
+            $str = get_noun_plural_form($time, 'минуту', 'минуты', 'минут');
             break;
 
         // часы - если до текущего времени прошло больше 60 минут, но меньше 24 часов, то формат будет вида «% часов назад»
@@ -181,7 +188,7 @@ function getRelativePostDate(string $post_date): string
         // недели - если до текущего времени прошло больше 7 дней, но меньше 5 недель, то формат будет вида «% недель назад»
         case ($diff >= (24 * 3600 * 7) && $diff < (24 * 3600 * 7 * 5)):
             $time = round($diff / (60 * 60 * 24 * 7));
-            $str = get_noun_plural_form($time, 'неделя', 'недели', 'недель');
+            $str = get_noun_plural_form($time, 'неделю', 'недели', 'недель');
             break;
 
         // месяцы - если до текущего времени прошло больше 5 недель, то формат будет вида «% месяцев назад»
@@ -415,6 +422,16 @@ function displaySubscribersCount(int $count) : string
     );
 }
 
+function displaySubscriptionsCount(int $count) : string
+{
+    return get_noun_plural_form(
+        $count,
+        'подписка',
+        'подписки',
+        'подписок'
+    );
+}
+
 /**
  * Получает значение из поля input массива POST для вывода в процессе валидации
  *
@@ -508,7 +525,7 @@ function handle_attached_file($img_url)
     $file_new_name = uniqid() . '.' . $file_ext;
 
     $image = file_get_contents($img_url);
-	file_put_contents($path . $file_new_name, $image);
+    file_put_contents($path . $file_new_name, $image);
 
     return $file_new_name;
 }
@@ -1319,4 +1336,221 @@ function insert_user_into_db($conn, $post, $avatar)
     mysqli_stmt_execute($stmt);
 
     return true;
+}
+
+function show_user_name(string $name) : string
+{
+    $arr = explode(' ', $name);
+
+    return implode('<br>', $arr);
+}
+
+/**
+ * Проверяет, подписан ли текущий пользователь на другого пользователя
+ *
+ * @param integer $subscriber_id
+ * @param integer $user_id
+ * @return integer|null
+ */
+function is_subscribed(int $subscriber_id, int $user_id) : int|null
+{
+    global $conn;
+
+    $sql = "SELECT
+                id
+            FROM
+                subscriptions
+            WHERE
+                user_id = ?
+            AND
+                subscriber_id = ?
+    ";
+
+    $result = selectRow($conn, $sql, [$user_id, $subscriber_id]);
+
+    return $result ? $result['id'] : null;
+}
+
+function subscribe_unsubscribe(int $subscriber_id, int $user_id)
+{
+    $id = is_subscribed($subscriber_id, $user_id);
+    ($id !== null) ? unsubscribe_from_user($id) : subscribe_to_user($subscriber_id, $user_id);
+
+    return true;
+}
+
+function subscribe_to_user(int $subscriber_id, int $user_id)
+{
+    global $conn;
+
+    $sql = "INSERT INTO
+                subscriptions
+                (subscriber_id, user_id)
+            VALUES
+                (?, ?)
+    ";
+    $stmt = db_get_prepare_stmt($conn, $sql, [$subscriber_id, $user_id]);
+    mysqli_stmt_execute($stmt);
+
+    // TODO: Отправить этому пользователю уведомление о новом подписчике
+    // (смотрите описание процесса «Отправка уведомлений»).
+}
+
+function unsubscribe_from_user(int $id)
+{
+    global $conn;
+
+    $sql = "DELETE FROM
+                subscriptions
+            WHERE
+                id = ?
+    ";
+    $stmt = db_get_prepare_stmt($conn, $sql, [$id]);
+    mysqli_stmt_execute($stmt);
+}
+
+/**
+ * Проверяем, существует ли пост в БД
+ *
+ * @param integer $post_id
+ * @return boolean
+ */
+function is_post_exists(int $post_id) : bool
+{
+    global $conn;
+    $sql = "SELECT id FROM posts WHERE id = ?";
+    $result = selectRow($conn, $sql, [$post_id]);
+
+    return $result ? true : false;
+}
+
+function is_post_liked(int $user_id, int $post_id) : int|null
+{
+    global $conn;
+
+    $sql = "SELECT
+                id
+            FROM
+                likes
+            WHERE
+                post_id = ?
+            AND
+                user_id = ?
+    ";
+
+    $result = selectRow($conn, $sql, [$post_id, $user_id]);
+
+    return $result ? $result['id'] : null;
+}
+
+function like_unlike($user_id, $post_id)
+{
+    if (is_post_exists($post_id)) {
+        $id = is_post_liked($user_id, $post_id);
+        ($id !== null)
+            ? unlike_post($id)
+            : like_post($user_id, $post_id);
+
+        return true;
+    }
+
+    return false;
+}
+
+function like_post(int $user_id, int $post_id)
+{
+    global $conn;
+
+    $sql = "INSERT INTO
+                likes
+                (user_id, post_id)
+            VALUES
+                (?, ?)
+    ";
+    $stmt = db_get_prepare_stmt($conn, $sql, [$user_id, $post_id]);
+    mysqli_stmt_execute($stmt);
+}
+
+function unlike_post(int $id)
+{
+    global $conn;
+
+    $sql = "DELETE FROM
+                likes
+            WHERE
+                id = ?
+    ";
+    $stmt = db_get_prepare_stmt($conn, $sql, [$id]);
+    mysqli_stmt_execute($stmt);
+}
+
+/**
+ * Репост записи
+ *
+ * @param integer $user_id
+ * @param integer $post_id
+ * @return void
+ */
+function repost($user_id, $post_id)
+{
+    global $conn;
+
+    if (is_post_exists($post_id)) {
+        $sql = "SELECT * FROM posts WHERE id = ?";
+        $post = selectRow($conn, $sql, [$post_id]);
+
+        $data = [];
+        foreach ($post as $key => $value) {
+            if ($key == 'id' || $key == 'views_count' || $key == 'reposts_count' || $key == 'author_id' || $key == 'updated_at') {
+                continue;
+            }
+            $data[$key] = $value;
+            if ($key == 'is_reposted') {
+                $data[$key] = '1';
+            }
+            if ($key == 'user_id') {
+                $data['author_id'] = $value;
+                $data[$key] = $user_id;
+            }
+            if ($key == 'created_at') {
+                $data['updated_at'] = $value;
+                $data[$key] = new DateTime('now');
+                $data[$key] = $data[$key]->format('Y-m-d H:i:s');
+            }
+        }
+
+        mysqli_begin_transaction($conn);
+
+        try {
+            $sql = "INSERT INTO posts (
+                        heading,
+                        content,
+                        quote_author,
+                        user_id,
+                        author_id,
+                        type_id,
+                        tag_ids,
+                        is_reposted,
+                        created_at,
+                        updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ";
+
+            $stmt = db_get_prepare_stmt($conn, $sql, $data);
+            mysqli_stmt_execute($stmt);
+
+            $stmt = db_get_prepare_stmt($conn, "UPDATE posts SET reposts_count = (reposts_count + 1) WHERE id = ?", [$post_id]);
+            mysqli_stmt_execute($stmt);
+
+            mysqli_commit($conn);
+
+            return true;
+        } catch (mysqli_sql_exception $exception) {
+            mysqli_rollback($conn);
+
+            throw $exception;
+        }
+    }
+
+    return false;
 }

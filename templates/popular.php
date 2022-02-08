@@ -41,7 +41,7 @@
                             <span>Все</span>
                         </a>
                     </li>
-                    <?php foreach($types as $type) : ?>
+                    <?php foreach ($types as $type) : ?>
                     <li class="popular__filters-item filters__item">
                         <a class="filters__button filters__button--<?= $type['type']; ?> button <?php if ($type_id == $type['id']) : ?>filters__button--active<?php endif; ?>" href="?id=<?= $type['id']; ?>">
                             <span class="visually-hidden"><?= $type['name']; ?></span>
@@ -56,7 +56,7 @@
         </div>
         <div class="popular__posts">
             <?php if (is_array($posts) && !empty($posts)) : ?>
-                <?php foreach($posts as $post) : ?>
+                <?php foreach ($posts as $post) : ?>
                 <?php $post_date = generate_random_date($post['id']); ?>
                     <article class="popular__post post post-<?= $post['type']; ?>">
                         <header class="post__header">
@@ -114,9 +114,9 @@
                         </div>
                         <footer class="post__footer">
                             <div class="post__author">
-                                <a class="post__author-link" href="#" title="Автор">
+                                <a class="post__author-link" href="profile.php?id=<?= $post['user_id']; ?>" title="<?= htmlspecialchars($post['login']); ?>">
                                     <div class="post__avatar-wrapper">
-                                        <img class="post__author-avatar" src="img/<?= htmlspecialchars($post['userpic']); ?>" width="40" height="40" alt="Аватар пользователя <?= htmlspecialchars($post['login']); ?>">
+                                        <img class="post__author-avatar" src="uploads/userpic/<?= htmlspecialchars($post['userpic']); ?>" width="40" height="40" alt="Аватар пользователя <?= htmlspecialchars($post['login']); ?>">
                                     </div>
                                     <div class="post__info">
                                         <b class="post__author-name"><?= htmlspecialchars($post['login']); ?></b>

@@ -75,7 +75,7 @@
                                 <div class="header__profile-tooltip">
                                     <ul class="header__profile-nav">
                                         <li class="header__profile-nav-item">
-                                            <a class="header__profile-nav-link" href="profile.php">
+                                            <a class="header__profile-nav-link" href="profile.php?id=<?= $_SESSION['user']['id']; ?>">
                                                 <span class="header__profile-nav-text">
                                                     Мой профиль
                                                 </span>

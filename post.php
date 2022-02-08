@@ -1,6 +1,12 @@
 <?php
 
 require_once('config.php');
+
+if (!isset($_SESSION['user'])) {
+    header("Location: " . PATH);
+    exit();
+}
+
 require_once('functions.php');
 
 $post_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
@@ -33,6 +39,7 @@ $sql = "SELECT
 
 $post = selectRow($conn, $sql, [$post_id]);
 debug($post);
+// TODO: добавить счетчик просмотров
 
 if (!$post) {
     $main_content = include_template('404.php');

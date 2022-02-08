@@ -2,10 +2,10 @@
 
 require_once('config.php');
 
-/* if (!isset($_SESSION['user'])) {
-    http_response_code(403);
-    exit('У вас нет прав для добавления лота! Зарегистрируйтесь на сайте и добавьте лот.');
-} */
+if (!isset($_SESSION['user'])) {
+    header("Location: " . PATH);
+    exit();
+}
 
 require_once('functions.php');
 require_once('validation.php');

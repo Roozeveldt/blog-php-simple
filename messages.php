@@ -8,9 +8,8 @@ if (!isset($_SESSION['user'])) {
 }
 
 require_once('functions.php');
-require_once('types.php');
 
-$type_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+/* $type_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 $type_id = abs((int)$type_id);
 
 $sql = "SELECT
@@ -35,9 +34,9 @@ if ($type_id !== 0) {
 
 $sql .= " ORDER BY reposts_count DESC LIMIT 0, $posts_per_page";
 
-$posts = selectRows($conn, $sql, ($type_id !== 0) ? [$type_id] : []);
+$posts = selectRows($conn, $sql, ($type_id !== 0) ? [$type_id] : []); */
 
-$main_content = include_template('popular.php', [
+$main_content = include_template('messages.php', [
     'types' => $types,
     'posts' => $posts,
     'type_id' => $type_id ?? 0,
@@ -45,7 +44,7 @@ $main_content = include_template('popular.php', [
 
 $layout_content = include_template('layout.php', [
     'header' => include_template('header.php', [
-        'title' => 'readme: Популярное',
+        'title' => 'readme: Личные сообщения',
     ]),
     'content' => $main_content,
     'footer' => include_template('footer.php'),
