@@ -13,8 +13,8 @@ require_once('functions.php');
 
 $input = filter_input_array(INPUT_GET);
 $active_tab = empty($input['tab']) ? 'posts' : $input['tab'];
-
 $params = [];
+
 if ($input) {
     foreach ($input as $k => $v) {
         if ($k == 'id') {
@@ -195,8 +195,9 @@ if ($input) {
             }
         }
     }
-    $url = "/" . pathinfo(__FILE__, PATHINFO_BASENAME) . "?" . http_build_query($params);
 }
+
+$url = "/" . pathinfo(__FILE__, PATHINFO_BASENAME) . "?" . http_build_query($params);
 
 if (!isset($user)) {
     $main_content = include_template('404.php');

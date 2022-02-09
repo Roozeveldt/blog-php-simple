@@ -64,9 +64,9 @@
                                     <header class="post__header">
                                         <?php if ($post['is_reposted']) : ?>
                                             <div class="post__author">
-                                                <a class="post__author-link" href="profile.php?id=<?= $post['author_id']; ?>" title="Автор">
+                                                <a class="post__author-link" href="profile.php?id=<?= $post['author_id']; ?>" title="Автор оригинального поста">
                                                     <div class="post__avatar-wrapper post__avatar-wrapper--repost">
-                                                        <img class="post__author-avatar" src="uploads/userpic/<?= $post['author_userpic']; ?>" alt="Аватар пользователя <?= $post['author_login']; ?>" />
+                                                        <img class="post__author-avatar" src="uploads/userpic/<?= $post['author_userpic']; ?>" alt="Аватар пользователя <?= $post['author_login']; ?>" width="60" height="60" />
                                                     </div>
                                                     <div class="post__info">
                                                         <b class="post__author-name">Репост: <?= $post['author_login']; ?></b>
@@ -109,7 +109,7 @@
                                         <?php if (isset($post['tags'])) : ?>
                                             <ul class="post__tags">
                                                 <?php foreach ($post['tags'] as $k => $v) : ?>
-                                                    <li><a href="tag.php?id=<?= $k; ?>">#<?= $v; ?></a></li>
+                                                    <li><a href="search.php?id=<?= $k; ?>">#<?= $v; ?></a></li>
                                                 <?php endforeach; ?>
                                             </ul>
                                         <?php endif; ?>
