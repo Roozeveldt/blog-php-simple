@@ -39,17 +39,17 @@
             <nav class="header__nav">
                 <ul class="header__my-nav" <?php if (basename($_SERVER['PHP_SELF']) == 'registration.php' || basename($_SERVER['PHP_SELF']) == 'login.php') : ?>style="visibility: hidden;"<?php endif; ?>>
                     <li class="header__my-page header__my-page--popular">
-                        <a class="header__page-link <?php if (basename($_SERVER['PHP_SELF']) == 'popular.php') : ?>header__page-link--active<?php endif; ?>" <?php if (basename($_SERVER['PHP_SELF']) !== 'popular.php') : ?>href="popular.php"<?php endif; ?> title="Популярный контент">
+                        <a class="header__page-link <?php if (basename($_SERVER['PHP_SELF']) == 'popular.php') : ?>header__page-link--active<?php endif; ?>" href="popular.php" title="Популярный контент">
                             <span class="visually-hidden">Популярный контент</span>
                         </a>
                     </li>
                     <li class="header__my-page header__my-page--feed">
-                        <a class="header__page-link <?php if (basename($_SERVER['PHP_SELF']) == 'feed.php') : ?>header__page-link--active<?php endif; ?>" <?php if (basename($_SERVER['PHP_SELF']) !== 'feed.php') : ?>href="feed.php"<?php endif; ?> title="Моя лента">
+                        <a class="header__page-link <?php if (basename($_SERVER['PHP_SELF']) == 'feed.php') : ?>header__page-link--active<?php endif; ?>" href="feed.php" title="Моя лента">
                             <span class="visually-hidden">Моя лента</span>
                         </a>
                     </li>
                     <li class="header__my-page header__my-page--messages">
-                        <a class="header__page-link <?php if (basename($_SERVER['PHP_SELF']) == 'messages.php') : ?>header__page-link--active<?php endif; ?>" <?php if (basename($_SERVER['PHP_SELF']) !== 'messages.php') : ?>href="messages.php"<?php endif; ?> title="Личные сообщения">
+                        <a class="header__page-link <?php if (basename($_SERVER['PHP_SELF']) == 'messages.php') : ?>header__page-link--active<?php endif; ?>" href="messages.php" title="Личные сообщения">
                             <span class="visually-hidden">Личные сообщения</span>
                         </a>
                     </li>

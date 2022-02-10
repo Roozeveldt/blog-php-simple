@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Novosibirsk');
 session_start();
 
 // количество постов на странице
-$posts_per_page = 24;
+const PER_PAGE = 6;
 
 const PATH = 'http://readme.local';
 const DEFAULT_AVATAR = 'userpic-big.jpg';

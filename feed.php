@@ -13,8 +13,7 @@ require_once('functions.php');
 require_once('types.php');
 
 $input = filter_input_array(INPUT_GET);
-$active_tab = empty($input['type']) ? '' : $input['type'];
-// debug($input);
+$tab = empty($input['type']) ? '' : $input['type'];
 
 $sql = "SELECT
             posts.id AS id,
@@ -44,6 +43,7 @@ $sql = "SELECT
             user_id IN (SELECT subscriptions.user_id FROM subscriptions WHERE subscriber_id = ?)
 ";
 
+$sql_data = [$cur_user_id];
 $params = [];
 
 if ($input) {
@@ -51,8 +51,7 @@ if ($input) {
         if ($k == 'type') {
             $type = filter_input(INPUT_GET, 'type', FILTER_SANITIZE_SPECIAL_CHARS);
             $sql .= " AND type_id = (SELECT types.id FROM types WHERE types.type = ?)";
-            $sql .= " ORDER BY posts.created_at DESC LIMIT 0, $posts_per_page";
-            $posts = selectRows($conn, $sql, [$cur_user_id, $type]);
+            array_push($sql_data, $type);
         }
         if ($k == 'do') {
             switch ($v) {
@@ -71,10 +70,10 @@ if ($input) {
             }
         }
     }
-} else {
-    $sql .= " ORDER BY posts.created_at DESC LIMIT 0, $posts_per_page";
-    $posts = selectRows($conn, $sql, [$cur_user_id]);
 }
+
+$sql .= " ORDER BY posts.created_at DESC";
+$posts = selectRows($conn, $sql, $sql_data);
 
 $url = "/" . pathinfo(__FILE__, PATHINFO_BASENAME) . "?" . http_build_query($params);
 
@@ -97,7 +96,7 @@ if ($posts) {
 
 $main_content = include_template('feed.php', [
     'url' => $url,
-    'tab' => $tab ?? $active_tab,
+    'tab' => $tab,
     'types' => $types,
     'posts' => $posts ?? [],
 ]);
