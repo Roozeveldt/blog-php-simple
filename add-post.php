@@ -93,6 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 # code...
                 break;
         }
+        // TODO: Отправить уведомления подписчикам пользователя о новом посте
+        // (процесс «Отправка уведомлений»).
         header("Location: " . PATH . "/post.php?id=" . $last_id);
         exit();
     }

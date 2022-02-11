@@ -454,6 +454,17 @@ function getPostVal($name)
 }
 
 /**
+ * Получает значение из поля input массива GET для вывода в процессе валидации
+ *
+ * @param string $name
+ * @return string|null
+ */
+function getGetVal($name)
+{
+    return !empty($_GET[$name]) ? h($_GET[$name]) : "";
+}
+
+/**
  * Очищает введенные в поля данные
  *
  * @param string $string

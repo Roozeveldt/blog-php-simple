@@ -136,7 +136,7 @@
                                 <?php if (isset($post['tags'])) : ?>
                                     <ul class="post__tags">
                                         <?php foreach ($post['tags'] as $k => $v) : ?>
-                                            <li><a href="search.php?id=<?= $k; ?>">#<?= $v; ?></a></li>
+                                            <li><a href="search.php?search=<?= urlencode("#{$v}"); ?>">#<?= $v; ?></a></li>
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php endif; ?>

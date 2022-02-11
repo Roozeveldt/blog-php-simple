@@ -117,3 +117,6 @@ ALTER TABLE `subscriptions`
   REFERENCES `users`(`id`)
   ON DELETE RESTRICT
   ON UPDATE RESTRICT;
+
+-- fulltext search
+CREATE FULLTEXT INDEX post_ft_search ON posts(heading, content);
