@@ -14,7 +14,7 @@
                                     ? 'filters__button--active'
                                     : '';
                             ?>
-                            <a class="adding-post__tabs-link filters__button filters__button--<?= $item['type']; ?> tabs__item button <?= $active; ?> tabs__item--active" href="#">
+                            <a class="adding-post__tabs-link filters__button filters__button--<?= $item['type']; ?> tabs__item button <?= $active; ?> tabs__item--active" href="?<?= http_build_query(array_merge($params, ['type' => $item['type']])); ?>">
                                 <svg class="filters__icon" width="24" height="24">
                                     <use xlink:href="#icon-filter-<?= $item['type']; ?>"></use>
                                 </svg>
@@ -28,7 +28,7 @@
                     <?php foreach ($types as $item) : ?>
                         <section class="adding-post__photo tabs__content <?php if ($type == $item['type']) : ?>tabs__content--active<?php endif; ?>">
                             <h2 class="visually-hidden">Форма добавления <?= $item['name']; ?></h2>
-                            <form class="adding-post__form form" action="add.php" method="post" enctype="multipart/form-data">
+                            <form class="adding-post__form form" action="" method="post" enctype="multipart/form-data">
                                 <div class="form__text-inputs-wrapper">
                                     <div class="form__text-inputs">
                                         <!-- заголовок поста -->
@@ -179,30 +179,12 @@
                                         <input type="file" id="photo-file" name="photo-file">
                                         <br><br><br>
                                     </div>
-                                    <!-- <div class="adding-post__input-file-container form__input-container form__input-container--file">
-                                        <div class="adding-post__input-file-wrapper form__input-file-wrapper">
-                                            <div class="adding-post__file-zone adding-post__file-zone--photo form__file-zone dropzone">
-                                                <input class="adding-post__input-file form__input-file" id="photo-file" type="file" name="photo-file" title=" ">
-                                                <div class="form__file-zone-text">
-                                                    <span>Перетащите фото сюда</span>
-                                                </div>
-                                            </div>
-                                            <button class="adding-post__input-file-button form__input-file-button form__input-file-button--photo button" type="button">
-                                                <span>Выбрать фото</span>
-                                                <svg class="adding-post__attach-icon form__attach-icon" width="10" height="20">
-                                                    <use xlink:href="#icon-attach"></use>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <div class="adding-post__file adding-post__file--photo form__file dropzone-previews">
-                                        </div>
-                                    </div> -->
                                 <?php endif; ?>
                                 <div class="adding-post__buttons">
                                     <input type="hidden" name="type" value="<?= $item['type']; ?>">
                                     <input type="hidden" name="type_id" value="<?= $item['id']; ?>">
                                     <button class="adding-post__submit button button--main" type="submit">Опубликовать</button>
-                                    <a class="adding-post__close" href="#">Закрыть</a>
+                                    <a class="adding-post__close" href="?do=close">Закрыть</a>
                                 </div>
                             </form>
                         </section>

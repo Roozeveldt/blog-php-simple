@@ -5,6 +5,8 @@ require_once('config.php');
 if (!isset($_SESSION['user'])) {
     header("Location: " . PATH);
     exit();
+} else {
+    $cur_user_id = $_SESSION['user']['id'];
 }
 
 require_once('functions.php');
@@ -13,17 +15,35 @@ require_once('validation.php');
 // типы контента
 require_once('types.php');
 
+$input = filter_input_array(INPUT_GET);
+
 // включённая при первичной загрузке страницы вкладка
 $type = 'text';
+$params['type'] = $type;
+
+if ($input) {
+    foreach ($input as $k => $v) {
+        if ($k == 'type') {
+            $type = filter_input(INPUT_GET, 'type', FILTER_SANITIZE_SPECIAL_CHARS);
+            $params[$k] = $type;
+        }
+        if ($k == 'do') {
+            if ($v == 'close') {
+                header("Location: " . $_SERVER['HTTP_REFERER']);
+                exit();
+            }
+        }
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $getPostVal = [];
     foreach ($_POST as $key => $value) {
         $getPostVal[$key] = getPostVal($key);
     }
-
     $type = h($_POST['type']);
     $file = array_key_first($_FILES);
+    $_POST['user_id'] = $cur_user_id;
 
     switch ($type) {
         case 'photo':
@@ -79,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 $main_content = include_template('add-post.php', [
+    'params' => $params,
     'type' => $type,
     'types' => $types,
     'errors' => isset($errors) ? $errors : [],

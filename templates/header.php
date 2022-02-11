@@ -101,7 +101,7 @@
                             </div>
                         </li>
                         <li>
-                            <a class="header__post-button button button--transparent" href="add.php">Пост</a>
+                            <a class="header__post-button button button--transparent" href="add-post.php">Пост</a>
                         </li>
                     </ul>
                 <?php else : ?>

@@ -1139,7 +1139,7 @@ function insert_photo_post_into_db($conn, $post, $image)
 {
     $data = [
         'heading'   => h($post['photo-heading']),
-        'user_id'   => 5,
+        'user_id'   => (int)$post['user_id'],
         'type_id'   => (int)$post['type_id'],
         'content'   => $image,
     ];
@@ -1184,7 +1184,7 @@ function insert_video_post_into_db($conn, $post)
 {
     $data = [
         'heading'   => h($post['video-heading']),
-        'user_id'   => 5,
+        'user_id'   => (int)$post['user_id'],
         'type_id'   => (int)$post['type_id'],
         'content'   => h($post['video-url']),
     ];
@@ -1229,7 +1229,7 @@ function insert_text_post_into_db($conn, $post)
 {
     $data = [
         'heading'   => h($post['text-heading']),
-        'user_id'   => 5,
+        'user_id'   => (int)$post['user_id'],
         'type_id'   => (int)$post['type_id'],
         'content'   => h($post['text-content']),
     ];
@@ -1274,7 +1274,7 @@ function insert_quote_post_into_db($conn, $post)
 {
     $data = [
         'heading'   => h($post['quote-heading']),
-        'user_id'   => 5,
+        'user_id'   => (int)$post['user_id'],
         'type_id'   => (int)$post['type_id'],
         'content'   => h($post['quote-content']),
         'quote_author' => h($post['quote-author']),
@@ -1321,7 +1321,7 @@ function insert_link_post_into_db($conn, $post)
 {
     $data = [
         'heading'   => h($post['link-heading']),
-        'user_id'   => 5,
+        'user_id'   => (int)$post['user_id'],
         'type_id'   => (int)$post['type_id'],
         'content'   => h($post['link-url']),
     ];

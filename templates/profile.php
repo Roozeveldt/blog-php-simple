@@ -358,11 +358,11 @@
                                         </div>
                                         <div class="post-mini__rating user__rating">
                                             <p class="post-mini__rating-item user__rating-item user__rating-item--publications">
-                                                <span class="post-mini__rating-amount user__rating-amount"><?= $subscription['user_posts_count']; ?></span>
+                                                <a href="profile.php?id=<?= $subscription['sub_user_id']; ?>&tab=posts"><span class="post-mini__rating-amount user__rating-amount"><?= $subscription['user_posts_count']; ?></span></a>
                                                 <span class="post-mini__rating-text user__rating-text"><?= displayPostsCount($subscription['user_posts_count']); ?></span>
                                             </p>
                                             <p class="post-mini__rating-item user__rating-item user__rating-item--subscribers">
-                                                <span class="post-mini__rating-amount user__rating-amount"><?= $subscription['user_subscribers_count']; ?></span>
+                                                <a href="profile.php?id=<?= $subscription['sub_user_id']; ?>&tab=subscribers"><span class="post-mini__rating-amount user__rating-amount"><?= $subscription['user_subscribers_count']; ?></span></a>
                                                 <span class="post-mini__rating-text user__rating-text"><?= displaySubscribersCount($subscription['user_subscribers_count']); ?></span>
                                             </p>
                                         </div>
@@ -388,23 +388,23 @@
                                         <div class="post-mini__user-info user__info">
                                             <div class="post-mini__avatar user__avatar">
                                                 <a class="user__avatar-link" href="profile.php?id=<?= $subscriber['subscriber_id']; ?>">
-                                                    <img class="post-mini__picture user__picture" src="uploads/userpic/<?= $subscriber['userpic']; ?>" alt="Аватар пользователя <?= h($subscriber['login']); ?>"/>
+                                                    <img class="post-mini__picture user__picture" src="uploads/userpic/<?= $subscriber['userpic']; ?>" alt="Аватар пользователя <?= $subscriber['login']; ?>"/>
                                                 </a>
                                             </div>
                                             <div class="post-mini__name-wrapper user__name-wrapper">
                                                 <a class="post-mini__name user__name" href="profile.php?id=<?= $subscriber['subscriber_id']; ?>">
-                                                    <span><?= h($subscriber['login']); ?></span>
+                                                    <span><?= $subscriber['login']; ?></span>
                                                 </a>
                                                 <time class="post-mini__time user__additional" datetime="<?= date("c", strtotime($subscriber['created_at'])); ?>"><?= displayUserRegistrationPeriod($subscriber['created_at']); ?></time>
                                             </div>
                                         </div>
                                         <div class="post-mini__rating user__rating">
                                             <p class="post-mini__rating-item user__rating-item user__rating-item--publications">
-                                                <span class="post-mini__rating-amount user__rating-amount"><?= $subscriber['subscriber_posts_count']; ?></span>
+                                                <a href="profile.php?id=<?= $subscriber['subscriber_id']; ?>&tab=posts"><span class="post-mini__rating-amount user__rating-amount"><?= $subscriber['subscriber_posts_count']; ?></span></a>
                                                 <span class="post-mini__rating-text user__rating-text"><?= displayPostsCount($subscriber['subscriber_posts_count']); ?></span>
                                             </p>
                                             <p class="post-mini__rating-item user__rating-item user__rating-item--subscribers">
-                                                <span class="post-mini__rating-amount user__rating-amount"><?= $subscriber['user_subscriptions_count']; ?></span>
+                                                <a href="profile.php?id=<?= $subscriber['subscriber_id']; ?>&tab=subscriptions"><span class="post-mini__rating-amount user__rating-amount"><?= $subscriber['user_subscriptions_count']; ?></span></a>
                                                 <span class="post-mini__rating-text user__rating-text"><?= displaySubscriptionsCount($subscriber['user_subscriptions_count']); ?></span>
                                             </p>
                                         </div>

@@ -39,7 +39,7 @@
 
                                     <!-- пост-картинка -->
                                     <?php if ($post['type'] == 'photo') : ?>
-                                        <h2><a href="post.php?id=<?= $post['id']; ?>"><?= h($post['heading']); ?></a></h2>
+                                        <h2><a href="post.php?id=<?= $post['id']; ?>"><?= $post['heading']; ?></a></h2>
                                         <div class="post-photo__image-wrapper">
                                             <img src="uploads/<?= $post['content']; ?>" alt="Фото от пользователя" width="760" height="396">
                                         </div>
@@ -73,29 +73,29 @@
 
                                     <!-- пост-текст -->
                                     <?php if ($post['type'] == 'text') : ?>
-                                        <h2><a href="post.php?id=<?= $post['id']; ?>"><?= h($post['heading']); ?></a></h2>
+                                        <h2><a href="post.php?id=<?= $post['id']; ?>"><?= $post['heading']; ?></a></h2>
                                         <?= sliceText($post['content'], $post['id']); ?>
                                     <?php endif; ?>
 
                                     <!-- пост-цитата -->
                                     <?php if ($post['type'] == 'quote') : ?>
                                         <blockquote>
-                                            <p><?= h($post['content']); ?></p>
-                                            <cite><?= h($post['quote_author']); ?></cite>
+                                            <p><?= $post['content']; ?></p>
+                                            <cite><?= $post['quote_author']; ?></cite>
                                         </blockquote>
                                     <?php endif; ?>
 
                                     <!-- пост-ссылка -->
                                     <?php if ($post['type'] == 'link') : ?>
                                         <div class="post-link__wrapper">
-                                            <a class="post-link__external" href="<?= h($post['content']); ?>" title="Перейти по ссылке" target="_blank">
+                                            <a class="post-link__external" href="<?= $post['content']; ?>" title="Перейти по ссылке" target="_blank">
                                                 <div class="post-link__icon-wrapper">
                                                     <img src="../img/logo-vita.jpg" alt="Иконка">
                                                 </div>
                                                 <div class="post-link__info">
-                                                    <h3><?= h($post['heading']); ?></h3>
+                                                    <h3><?= $post['heading']; ?></h3>
                                                     <p>Переходи по ссылке</p>
-                                                    <span><?= h($post['content']); ?></span>
+                                                    <span><?= $post['content']; ?></span>
                                                 </div>
                                                 <svg class="post-link__arrow" width="11" height="16">
                                                     <use xlink:href="#icon-arrow-right-ad"></use>
