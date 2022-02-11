@@ -8,6 +8,9 @@ session_start();
 // количество постов на странице
 const PER_PAGE = 6;
 
+// количество комментариев на странице
+const COMMENTS_LIMIT = 2;
+
 const PATH = 'http://readme.local';
 const DEFAULT_AVATAR = 'userpic-big.jpg';
 

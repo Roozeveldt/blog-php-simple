@@ -432,6 +432,16 @@ function displaySubscriptionsCount(int $count) : string
     );
 }
 
+function displayViewsCount(int $count) : string
+{
+    return get_noun_plural_form(
+        $count,
+        'просмотр',
+        'просмотра',
+        'просмотров'
+    );
+}
+
 /**
  * Получает значение из поля input массива POST для вывода в процессе валидации
  *
@@ -912,6 +922,44 @@ function validate_login_field($name)
     }
 }
 
+function validate_comment_field($name)
+{
+    $messages = [
+        'content' => [
+            'required' => [
+                'Ошибка валидации',
+                'Это поле должно быть заполнено.',
+            ],
+            'too_short' => [
+                'Ошибка валидации',
+                'Длина комментария должна быть больше четырех символов.',
+            ],
+        ],
+        'post_id' => [
+            'post_not_found' => [
+                'Ошибка валидации',
+                'Такой пост не найден.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+
+    if ($name == 'content') {
+        if (mb_strlen(trim($_POST[$name])) <= 4) {
+            return $messages[$name]['too_short'];
+        }
+    }
+
+    if ($name == 'post_id') {
+        if (!is_post_exists($_POST[$name])) {
+            return $messages[$name]['post_not_found'];
+        }
+    }
+}
+
 /**
  * Проверяет поля формы логина
  *
@@ -1331,6 +1379,26 @@ function insert_user_into_db($conn, $post, $avatar)
                 password,
                 userpic
             ) VALUES (?, ?, ?, ?)";
+
+    $stmt = db_get_prepare_stmt($conn, $sql, $data);
+    mysqli_stmt_execute($stmt);
+
+    return true;
+}
+
+function insert_comment_into_db($conn, $post, $user_id)
+{
+    $data = [
+        'content' => h($post['content']),
+        'user_id' => (int)$user_id,
+        'post_id' => (int)$post['post_id'],
+    ];
+
+    $sql = "INSERT INTO comments (
+                content,
+                user_id,
+                post_id
+            ) VALUES (?, ?, ?)";
 
     $stmt = db_get_prepare_stmt($conn, $sql, $data);
     mysqli_stmt_execute($stmt);

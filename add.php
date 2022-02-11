@@ -87,8 +87,6 @@ $main_content = include_template('add-post.php', [
 
 $layout_content = include_template('layout.php', [
     'header' => include_template('header.php', [
-        'is_auth' => rand(0, 1),
-        'user_name' => 'Марчков Вячеслав',
         'title' => 'readme: Создание новой публикации',
     ]),
     'content' => $main_content,

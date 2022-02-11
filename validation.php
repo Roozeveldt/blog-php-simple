@@ -24,6 +24,15 @@ $login_rules = [
     },
 ];
 
+$comment_rules = [
+    'content' => function () {
+        return validate_comment_field('content');
+    },
+    'post_id' => function () {
+        return validate_comment_field('post_id');
+    },
+];
+
 $signin_rules = [
     'email' => function () {
         return validate_signin_field('email');

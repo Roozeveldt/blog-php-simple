@@ -27,7 +27,7 @@
                     </p>
                 </div>
                 <div class="profile__user-buttons user__buttons">
-                    <a href="<?= $url; ?>&do=subscribe&user_id=<?= $user['id']; ?>" class="profile__user-button user__button user__button--subscription button button--main">
+                    <a href="<?= $url; ?>&do=subscribe&user_id=<?= $user['id']; ?>" class="profile__user-button user__button user__button--subscription button button--<?= $is_subscribed ? 'quartz' : 'main'; ?>">
                         <?= $is_subscribed ? ' Отписаться ' : ' Подписаться '; ?>
                     </a>
                     <?php if ($is_subscribed) : ?>

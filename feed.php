@@ -32,7 +32,8 @@ $sql = "SELECT
             types.type,
             (SELECT users.login FROM users WHERE users.id = posts.author_id) AS author_login,
             (SELECT users.userpic FROM users WHERE users.id = posts.author_id) AS author_userpic,
-            (SELECT COUNT(likes.id) FROM likes WHERE likes.post_id = posts.id) AS likes_count
+            (SELECT COUNT(likes.id) FROM likes WHERE likes.post_id = posts.id) AS likes_count,
+            (SELECT COUNT(comments.id) FROM comments WHERE comments.post_id = posts.id) AS comments_count
         FROM
             posts
         JOIN
