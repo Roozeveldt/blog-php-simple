@@ -1470,9 +1470,7 @@ function subscribe_to_user(int $subscriber_id, int $user_id)
     ";
     $stmt = db_get_prepare_stmt($conn, $sql, [$subscriber_id, $user_id]);
     mysqli_stmt_execute($stmt);
-
-    // TODO: Отправить этому пользователю уведомление о новом подписчике
-    // (смотрите описание процесса «Отправка уведомлений»).
+    send_subscription_notification($subscriber_id, $user_id);
 }
 
 function unsubscribe_from_user(int $id)
@@ -1632,4 +1630,90 @@ function repost($user_id, $post_id)
     }
 
     return false;
+}
+/**
+ * Отправляем уведомление о новом подписчике
+ *
+ * @param integer $subscriber_id - пользователь, который подписался
+ * @param integer $user_id - пользователь, которому отправляем уведомления
+ * @return void
+ */
+function send_subscription_notification(int $subscriber_id, int $user_id)
+{
+    global $conn;
+    global $mailer;
+
+    // Create a message
+    $message = new Swift_Message();
+    $message->setFrom([
+        SenderEmail => SenderName,
+    ]);
+
+    try {
+        $sql = "SELECT login, email FROM users WHERE id = ?";
+        $user = selectRow($conn, $sql, [$user_id]);
+
+        $sql = "SELECT id, login FROM users WHERE id = ?";
+        $subscriber = selectRow($conn, $sql, [$subscriber_id]);
+
+        $message->setTo([$user['email'] => $user['login']]);
+        $message->setSubject($user['login'] . ', у вас новый подписчик');
+
+        $body = include_template('/mail/new-subscriber.php', [
+            'user_login' => $user['login'],
+            'subscriber_login' => $subscriber['login'],
+            'subscriber_id' => $subscriber['id'],
+        ]);
+
+        $message->setBody($body, 'text/html');
+        $mailer->send($message);
+    } catch (Exception $exception) {
+        throw $exception;
+    }
+}
+
+/**
+ * Отправляем уведомления подпичикам о новом посте пользователя, на которого они подписаны
+ *
+ * @param integer $author_id
+ * @param integer $post_id
+ * @return void
+ */
+function send_post_notification(int $author_id, int $post_id)
+{
+    global $conn;
+    global $mailer;
+
+    // Create a message
+    $message = new Swift_Message();
+    $message->setFrom([
+        SenderEmail => SenderName,
+    ]);
+
+    try {
+        // список адресатов-получателей уведомления
+        $sql = "SELECT subscriptions.id, users.login, users.email FROM subscriptions INNER JOIN users ON users.id = subscriptions.subscriber_id WHERE subscriptions.user_id = ?";
+        $receivers = selectRows($conn, $sql, [$author_id]);
+
+        $sql = "SELECT posts.id, posts.heading, posts.user_id, users.login FROM posts INNER JOIN users ON users.id = posts.user_id WHERE posts.id = ?";
+        $post = selectRow($conn, $sql, [$post_id]);
+
+        $message->setSubject('Новая публикация от пользователя ' . $post['login']);
+
+        foreach ($receivers as $receiver) {
+            $message->setTo([$receiver['email'] => $receiver['login']]);
+
+            $body = include_template('/mail/new-post.php', [
+                'login' => $receiver['login'],
+                'author_id' => $post['user_id'],
+                'author' => $post['login'],
+                'post' => $post['heading'],
+            ]);
+
+            $message->setBody($body, 'text/html');
+            $mailer->send($message);
+        }
+    } catch (Exception $exception) {
+        throw $exception;
+    }
 }

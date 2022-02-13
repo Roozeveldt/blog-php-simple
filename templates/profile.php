@@ -59,7 +59,7 @@
                                 <article class="profile__post post post-<?= $post['type']; ?>">
                                     <header class="post__header">
                                         <?php if ($post['is_reposted']) : ?>
-                                            <div class="post__author">
+                                            <div class="post__author" style="padding-bottom: 0;">
                                                 <a class="post__author-link" href="profile.php?id=<?= $post['author_id']; ?>" title="Автор оригинального поста">
                                                     <div class="post__avatar-wrapper post__avatar-wrapper--repost">
                                                         <img class="post__author-avatar" src="uploads/userpic/<?= $post['author_userpic']; ?>" alt="Аватар пользователя <?= $post['author_login']; ?>" width="60" height="60" />
@@ -70,9 +70,8 @@
                                                     </div>
                                                 </a>
                                             </div>
-                                        <?php else : ?>
-                                            <h2 <?php if ($post['type'] == 'text') : ?>style="padding: 29px 40px 0 40px;"<?php endif; ?>><a href="post.php?id=<?= $post['id']; ?>"><?= $post['heading']; ?></a></h2>
                                         <?php endif; ?>
+                                        <h2 <?php if ($post['type'] == 'text') : ?>style="padding: 29px 40px 0 40px;"<?php endif; ?>><a href="post.php?id=<?= $post['id']; ?>"><?= $post['heading']; ?></a></h2>
                                     </header>
                                     <div class="post__main">
 

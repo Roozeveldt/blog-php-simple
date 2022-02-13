@@ -90,11 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $last_id = insert_link_post_into_db($conn, $_POST);
                 break;
             default:
-                # code...
                 break;
         }
-        // TODO: Отправить уведомления подписчикам пользователя о новом посте
-        // (процесс «Отправка уведомлений»).
+        send_post_notification($cur_user_id, $last_id);
         header("Location: " . PATH . "/post.php?id=" . $last_id);
         exit();
     }

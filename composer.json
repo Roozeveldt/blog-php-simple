@@ -1,0 +1,13 @@
+{
+    "name": "marchello/readme.local",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Viacheslav Marchkov",
+            "email": "slavamarchkov@gmail.com"
+        }
+    ],
+    "require": {
+        "swiftmailer/swiftmailer": "^6.3"
+    }
+}
