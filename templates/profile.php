@@ -5,11 +5,7 @@
             <div class="profile__user user container">
                 <div class="profile__user-info user__info">
                     <div class="profile__avatar user__avatar">
-                        <img
-                            class="profile__picture user__picture"
-                            src="uploads/userpic/<?= $user['userpic']; ?>"
-                            alt="Аватар пользователя <?= $user['login']; ?>"
-                        />
+                        <img class="profile__picture user__picture" src="uploads/userpic/<?= $user['userpic']; ?>" alt="Аватар пользователя <?= $user['login']; ?>" />
                     </div>
                     <div class="profile__name-wrapper user__name-wrapper">
                         <span class="profile__name user__name"><?= show_user_name($user['login']); ?></span>
@@ -18,16 +14,16 @@
                 </div>
                 <div class="profile__rating user__rating">
                     <p class="profile__rating-item user__rating-item user__rating-item--publications">
-                        <span class="user__rating-amount"><?= $user['posts_count']; ?></span>
+                        <a href="?<?= http_build_query(array_merge(['id' => $user['id'], 'tab' => 'posts'])); ?>"><span class="user__rating-amount"><?= $user['posts_count']; ?></span></a>
                         <span class="profile__rating-text user__rating-text"><?= displayPostsCount($user['posts_count']); ?></span>
                     </p>
                     <p class="profile__rating-item user__rating-item user__rating-item--subscribers">
-                        <span class="user__rating-amount"><?= $user['subscribers_count']; ?></span>
+                        <a href="?<?= http_build_query(array_merge(['id' => $user['id'], 'tab' => 'subscribers'])); ?>"><span class="user__rating-amount"><?= $user['subscribers_count']; ?></span></a>
                         <span class="profile__rating-text user__rating-text"><?= displaySubscribersCount($user['subscribers_count']); ?></span>
                     </p>
                 </div>
                 <div class="profile__user-buttons user__buttons">
-                    <a href="<?= $url; ?>&do=subscribe&user_id=<?= $user['id']; ?>" class="profile__user-button user__button user__button--subscription button button--<?= $is_subscribed ? 'quartz' : 'main'; ?>">
+                    <a href="?<?= http_build_query(array_merge(['do' => 'subscribe', 'user_id' => $user['id']])); ?>" class="profile__user-button user__button user__button--subscription button button--<?= $is_subscribed ? 'quartz' : 'main'; ?>">
                         <?= $is_subscribed ? ' Отписаться ' : ' Подписаться '; ?>
                     </a>
                     <?php if ($is_subscribed) : ?>
@@ -42,16 +38,16 @@
                     <b class="profile__tabs-caption filters__caption">Показать:</b>
                     <ul class="profile__tabs-list filters__list tabs__list">
                         <li class="profile__tabs-item filters__item">
-                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'posts') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="<?= $url; ?>&tab=posts">Посты</a>
+                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'posts') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="?<?= http_build_query(array_merge(['id' => $user['id'], 'tab' => 'posts'])); ?>">Посты</a>
                         </li>
                         <li class="profile__tabs-item filters__item">
-                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'likes') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="<?= $url; ?>&tab=likes">Лайки</a>
+                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'likes') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="?<?= http_build_query(array_merge(['id' => $user['id'], 'tab' => 'likes'])); ?>">Лайки</a>
                         </li>
                         <li class="profile__tabs-item filters__item">
-                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'subscriptions') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="<?= $url; ?>&tab=subscriptions">Подписки</a>
+                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'subscriptions') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="?<?= http_build_query(array_merge(['id' => $user['id'], 'tab' => 'subscriptions'])); ?>">Подписки</a>
                         </li>
                         <li class="profile__tabs-item filters__item">
-                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'subscribers') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="<?= $url; ?>&tab=subscribers">Подписчики</a>
+                            <a class="profile__tabs-link filters__button tabs__item <?php if ($tab == 'subscribers') : ?>filters__button--active tabs__item--active<?php endif; ?> button" href="?<?= http_build_query(array_merge(['id' => $user['id'], 'tab' => 'subscribers'])); ?>">Подписчики</a>
                         </li>
                     </ul>
                 </div>
@@ -75,18 +71,81 @@
                                                 </a>
                                             </div>
                                         <?php else : ?>
-                                            <h2><a href="post.php?id=<?= $post['id']; ?>"><?= $post['heading']; ?></a> <?= $post['type']; ?></h2>
+                                            <h2 <?php if ($post['type'] == 'text') : ?>style="padding: 29px 40px 0 40px;"<?php endif; ?>><a href="post.php?id=<?= $post['id']; ?>"><?= $post['heading']; ?></a></h2>
                                         <?php endif; ?>
                                     </header>
                                     <div class="post__main">
-                                        <div class="post-photo__image-wrapper">
-                                            <img src="../img/rock.jpg" alt="Фото от пользователя" width="760" height="396"/>
-                                        </div>
+
+                                        <!-- пост-картинка -->
+                                        <?php if ($post['type'] == 'photo') : ?>
+                                            <div class="post-photo__image-wrapper">
+                                                <img src="uploads/<?= $post['content']; ?>" alt="Фото от пользователя" width="760" height="396">
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <!-- пост-видео -->
+                                        <?php if ($post['type'] == 'video') : ?>
+                                            <div class="post-video__block">
+                                                <div class="post-video__preview">
+                                                    <img src="<?= embed_youtube_cover($post['content']); ?>" alt="Превью к видео" width="760" height="396">
+                                                </div>
+                                                <div class="post-video__control">
+                                                    <button class="post-video__play post-video__play--paused button button--video" type="button"><span class="visually-hidden">Запустить видео</span></button>
+                                                    <div class="post-video__scale-wrapper">
+                                                        <div class="post-video__scale">
+                                                            <div class="post-video__bar">
+                                                                <div class="post-video__toggle"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="post-video__fullscreen post-video__fullscreen--inactive button button--video" type="button"><span class="visually-hidden">Полноэкранный режим</span></button>
+                                                </div>
+                                                <button class="post-video__play-big button" type="button">
+                                                    <svg class="post-video__play-big-icon" width="27" height="28">
+                                                        <use xlink:href="#icon-video-play-big"></use>
+                                                    </svg>
+                                                    <span class="visually-hidden">Запустить проигрыватель</span>
+                                                </button>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <!-- пост-текст -->
+                                        <?php if ($post['type'] == 'text') : ?>
+                                            <?= sliceText($post['content'], $post['id']); ?>
+                                        <?php endif; ?>
+
+                                        <!-- пост-цитата -->
+                                        <?php if ($post['type'] == 'quote') : ?>
+                                            <blockquote>
+                                                <p><?= $post['content']; ?></p>
+                                                <cite><?= $post['quote_author']; ?></cite>
+                                            </blockquote>
+                                        <?php endif; ?>
+
+                                        <!-- пост-ссылка -->
+                                        <?php if ($post['type'] == 'link') : ?>
+                                            <div class="post-link__wrapper">
+                                                <a class="post-link__external" href="<?= $post['content']; ?>" title="Перейти по ссылке" target="_blank">
+                                                    <div class="post-link__icon-wrapper">
+                                                        <img src="../img/logo-vita.jpg" alt="Иконка">
+                                                    </div>
+                                                    <div class="post-link__info">
+                                                        <h3><?= $post['heading']; ?></h3>
+                                                        <p>Переходи по ссылке</p>
+                                                        <span><?= $post['content']; ?></span>
+                                                    </div>
+                                                    <svg class="post-link__arrow" width="11" height="16">
+                                                        <use xlink:href="#icon-arrow-right-ad"></use>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
+
                                     </div>
                                     <footer class="post__footer">
                                         <div class="post__indicators">
                                             <div class="post__buttons">
-                                                <a class="post__indicator post__indicator--likes button" href="<?= $url; ?>&do=like&post_id=<?= $post['id']; ?>" title="Лайк">
+                                                <a class="post__indicator post__indicator--likes button" href="?<?= http_build_query(array_merge(['do' => 'like', 'post_id' => $post['id']])); ?>" title="Лайк">
                                                     <svg class="post__indicator-icon" width="20" height="17">
                                                         <use xlink:href="#icon-heart"></use>
                                                     </svg>
@@ -96,7 +155,7 @@
                                                     <span><?= $post['likes_count']; ?></span>
                                                     <span class="visually-hidden">количество лайков</span>
                                                 </a>
-                                                <a class="post__indicator post__indicator--repost button" href="<?= $url; ?>&do=repost&post_id=<?= $post['id']; ?>" title="Репост">
+                                                <a class="post__indicator post__indicator--repost button" href="?<?= http_build_query(array_merge(['do' => 'repost', 'post_id' => $post['id']])); ?>" title="Репост">
                                                     <svg class="post__indicator-icon" width="19" height="17">
                                                         <use xlink:href="#icon-repost"></use>
                                                     </svg>
@@ -109,176 +168,73 @@
                                         <?php if (isset($post['tags'])) : ?>
                                             <ul class="post__tags">
                                                 <?php foreach ($post['tags'] as $k => $v) : ?>
-                                                    <li><a href="search.php?id=<?= $k; ?>">#<?= $v; ?></a></li>
+                                                    <li><a href="search.php?search=<?= urlencode("#{$v}"); ?>">#<?= $v; ?></a></li>
                                                 <?php endforeach; ?>
                                             </ul>
                                         <?php endif; ?>
                                     </footer>
-                                    <div class="comments">
-                                        <a class="comments__button button" href="#">Показать комментарии</a>
+                                    <div id="comments_<?= $post['id']; ?>" class="comments">
+                                        <?php if (!$post['show_comments']) : ?>
+                                            <?php if ($post['comments_count']) : ?>
+                                                <a class="comments__button button" href="?<?= http_build_query(array_merge($params, ['do' => 'show_comments', 'post_id' => $post['id']])); ?>#comments_<?= $post['id']; ?>">Показать комментарии (<?= $post['comments_count']; ?>)</a>
+                                            <?php else : ?>
+                                                <p style="text-align: center; margin-bottom: 30px;">Комментариев к этому посту пока нет...</p>
+                                            <?php endif; ?>
+                                        <?php else : ?>
+                                            <div class="comments__list-wrapper">
+                                                <ul class="comments__list">
+                                                    <?php foreach ($post['comments'] as $key => $comment) : ?>
+                                                        <li class="comments__item user">
+                                                            <div class="comments__avatar">
+                                                                <a class="user__avatar-link" href="profile.php?id=<?= $comment['user_id']; ?>">
+                                                                    <img class="comments__picture" src="uploads/userpic/<?= $comment['userpic']; ?>" alt="Аватар пользователя <?= $comment['login']; ?>" />
+                                                                </a>
+                                                            </div>
+                                                            <div class="comments__info">
+                                                                <div class="comments__name-wrapper">
+                                                                    <a class="comments__user-name" href="profile.php?id=<?= $comment['user_id']; ?>">
+                                                                        <span><?= $comment['login']; ?></span>
+                                                                    </a>
+                                                                    <time class="comments__time" datetime="<?= date("c", strtotime($comment['created_at'])); ?>"><?= getRelativePostDate($comment['created_at']); ?></time>
+                                                                </div>
+                                                                <p class="comments__text">
+                                                                    <?= nl2br($comment['content']); ?>
+                                                                </p>
+                                                            </div>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                                <?php if (count($post['comments']) < $post['comments_count']) : ?>
+                                                    <a class="comments__more-link" href="?<?= http_build_query(array_merge($params, ['show' => 'all', 'post_id' => $post['id']])); ?>#comments_<?= $post['id']; ?>">
+                                                        <span>Показать все комментарии</span>
+                                                        <sup class="comments__amount"><?= $post['comments_count']; ?></sup>
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
-                                </article>
-                            <?php endforeach; ?>
-
-                                <article class="profile__post post post-text">
-                                    <header class="post__header">
-                                        <!-- вырезал -->
-                                    </header>
-                                    <div class="post__main">
-                                    <h2><a href="#">Полезный пост про Байкал</a></h2>
-                                    <p>
-                                        Озеро Байкал – огромное древнее озеро в горах Сибири к
-                                        северу от монгольской границы. Байкал считается самым
-                                        глубоким озером в мире. Он окружен сетью пешеходных
-                                        маршрутов, называемых Большой байкальской тропой. Деревня
-                                        Листвянка, расположенная на западном берегу озера, –
-                                        популярная отправная точка для летних экскурсий. Зимой
-                                        здесь можно кататься на коньках и собачьих упряжках.
-                                    </p>
-                                    <a class="post-text__more-link" href="#">Читать далее</a>
-                                    </div>
-                                    <footer class="post__footer">
-                                    <div class="post__indicators">
-                                        <div class="post__buttons">
-                                        <a
-                                            class="post__indicator post__indicator--likes button"
-                                            href="#"
-                                            title="Лайк"
-                                        >
-                                            <svg
-                                            class="post__indicator-icon"
-                                            width="20"
-                                            height="17"
-                                            >
-                                            <use xlink:href="#icon-heart"></use>
-                                            </svg>
-                                            <svg
-                                            class="post__indicator-icon post__indicator-icon--like-active"
-                                            width="20"
-                                            height="17"
-                                            >
-                                            <use xlink:href="#icon-heart-active"></use>
-                                            </svg>
-                                            <span>250</span>
-                                            <span class="visually-hidden">количество лайков</span>
-                                        </a>
-                                        <a
-                                            class="post__indicator post__indicator--repost button"
-                                            href="#"
-                                            title="Репост"
-                                        >
-                                            <svg
-                                            class="post__indicator-icon"
-                                            width="19"
-                                            height="17"
-                                            >
-                                            <use xlink:href="#icon-repost"></use>
-                                            </svg>
-                                            <span>5</span>
-                                            <span class="visually-hidden"
-                                            >количество репостов</span
-                                            >
-                                        </a>
+                                    <form id="form_<?= $post['id']; ?>" class="comments__form form" action="#form_<?= $post['id']; ?>" method="post">
+                                        <div class="comments__my-avatar">
+                                            <img class="comments__picture" src="uploads/userpic/<?= $cur_user_userpic; ?>" alt="Аватар пользователя <?= $cur_user_login; ?>" width="40" height="40">
                                         </div>
-                                        <time class="post__time" datetime="2019-01-30T23:41"
-                                        >15 минут назад</time
-                                        >
-                                    </div>
-                                    <ul class="post__tags">
-                                        <li><a href="#">#nature</a></li>
-                                        <li><a href="#">#globe</a></li>
-                                        <li><a href="#">#photooftheday</a></li>
-                                        <li><a href="#">#canon</a></li>
-                                        <li><a href="#">#landscape</a></li>
-                                        <li><a href="#">#щикарныйвид</a></li>
-                                    </ul>
-                                    </footer>
-                                    <div class="comments">
-                                    <div class="comments__list-wrapper">
-                                        <ul class="comments__list">
-                                        <li class="comments__item user">
-                                            <div class="comments__avatar">
-                                            <a class="user__avatar-link" href="#">
-                                                <img
-                                                class="comments__picture"
-                                                src="../img/userpic-larisa.jpg"
-                                                alt="Аватар пользователя"
-                                                />
-                                            </a>
-                                            </div>
-                                            <div class="comments__info">
-                                            <div class="comments__name-wrapper">
-                                                <a class="comments__user-name" href="#">
-                                                <span>Лариса Роговая</span>
-                                                </a>
-                                                <time class="comments__time" datetime="2019-03-20"
-                                                >1 ч назад</time
-                                                >
-                                            </div>
-                                            <p class="comments__text">Красота!!!1!</p>
-                                            </div>
-                                        </li>
-                                        <li class="comments__item user">
-                                            <div class="comments__avatar">
-                                            <a class="user__avatar-link" href="#">
-                                                <img
-                                                class="comments__picture"
-                                                src="../img/userpic-larisa.jpg"
-                                                alt="Аватар пользователя"
-                                                />
-                                            </a>
-                                            </div>
-                                            <div class="comments__info">
-                                            <div class="comments__name-wrapper">
-                                                <a class="comments__user-name" href="#">
-                                                <span>Лариса Роговая</span>
-                                                </a>
-                                                <time class="comments__time" datetime="2019-03-18"
-                                                >2 дня назад</time
-                                                >
-                                            </div>
-                                            <p class="comments__text">
-                                                Озеро Байкал – огромное древнее озеро в горах
-                                                Сибири к северу от монгольской границы. Байкал
-                                                считается самым глубоким озером в мире. Он окружен
-                                                сетью пешеходных маршрутов, называемых Большой
-                                                байкальской тропой. Деревня Листвянка,
-                                                расположенная на западном берегу озера, –
-                                                популярная отправная точка для летних экскурсий.
-                                                Зимой здесь можно кататься на коньках и собачьих
-                                                упряжках.
-                                            </p>
-                                            </div>
-                                        </li>
-                                        </ul>
-                                        <a class="comments__more-link" href="#">
-                                        <span>Показать все комментарии</span>
-                                        <sup class="comments__amount">45</sup>
-                                        </a>
-                                    </div>
-                                    </div>
-                                    <form class="comments__form form" action="#" method="post">
-                                    <div class="comments__my-avatar">
-                                        <img
-                                        class="comments__picture"
-                                        src="../img/userpic-medium.jpg"
-                                        alt="Аватар пользователя"
-                                        />
-                                    </div>
-                                    <textarea
-                                        class="comments__textarea form__textarea"
-                                        placeholder="Ваш комментарий"
-                                    ></textarea>
-                                    <label class="visually-hidden">Ваш комментарий</label>
-                                    <button
-                                        class="comments__submit button button--green"
-                                        type="submit"
-                                    >
-                                        Отправить
-                                    </button>
+                                        <div class="form__input-section <?= ((isset($errors['comment_form_id']) && $errors['comment_form_id'] == "form_{$post['id']}") && isset($errors['content'])) ? "form__input-section--error" : ''; ?>">
+                                            <textarea class="comments__textarea form__textarea form__input" name="content" placeholder="Ваш комментарий"><?= (isset($errors['comment_form_id']) && $errors['comment_form_id'] == "form_{$post['id']}") && isset($errors['content']) ? getPostVal('content') : ''; ?></textarea>
+                                            <label class="visually-hidden">Ваш комментарий</label>
+                                            <?php if ((isset($errors['comment_form_id']) && $errors['comment_form_id'] == "form_{$post['id']}") && isset($errors['content'])) : ?>
+                                                <?php $form_error = include_template('form-error.php', [
+                                                    'key' => 'content',
+                                                    'errors' => $errors,
+                                                ]);
+                                                print($form_error); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <input type="hidden" name="post_id" value="<?= $post['id']; ?>">
+                                        <input type="hidden" name="user_id" value="<?= $user['id']; ?>">
+                                        <input type="hidden" name="comment_form" value="form_<?= $post['id']; ?>">
+                                        <button class="comments__submit button button--green" type="submit">Отправить</button>
                                     </form>
                                 </article>
-
+                            <?php endforeach; ?>
                         <?php else: ?>
                             <p>Публикаций у данного автора пока нет...</p>
                         <?php endif; ?>
@@ -367,8 +323,8 @@
                                             </p>
                                         </div>
                                         <div class="post-mini__user-buttons user__buttons">
-                                            <?php $is_subscribed_to_sub_user = is_subscribed($cur_user, $subscription['sub_user_id']); ?>
-                                            <a href="<?= $url; ?>&do=subscribe&user_id=<?= $subscription['sub_user_id']; ?>" class="post-mini__user-button user__button user__button--subscription button button--<?= $is_subscribed_to_sub_user ? 'quartz' : 'main'; ?>">
+                                            <?php $is_subscribed_to_sub_user = is_subscribed($cur_user_id, $subscription['sub_user_id']); ?>
+                                            <a href="?<?= http_build_query(array_merge(['do' => 'subscribe', 'user_id' => $subscription['sub_user_id']])); ?>" class="post-mini__user-button user__button user__button--subscription button button--<?= $is_subscribed_to_sub_user ? 'quartz' : 'main'; ?>">
                                                 <?= $is_subscribed_to_sub_user ? ' Отписаться ' : ' Подписаться '; ?>
                                             </a>
                                         </div>
@@ -409,8 +365,8 @@
                                             </p>
                                         </div>
                                         <div class="post-mini__user-buttons user__buttons">
-                                            <?php $is_subscribed_to_subscriber = is_subscribed($cur_user, $subscriber['subscriber_id']); ?>
-                                            <a href="<?= $url; ?>&do=subscribe&user_id=<?= $subscriber['subscriber_id']; ?>" class="post-mini__user-button user__button user__button--subscription button button--<?= $is_subscribed_to_subscriber ? 'quartz' : 'main'; ?>">
+                                            <?php $is_subscribed_to_subscriber = is_subscribed($cur_user_id, $subscriber['subscriber_id']); ?>
+                                            <a href="?<?= http_build_query(array_merge(['do' => 'subscribe', 'user_id' => $subscriber['subscriber_id']])); ?>" class="post-mini__user-button user__button user__button--subscription button button--<?= $is_subscribed_to_subscriber ? 'quartz' : 'main'; ?>">
                                                 <?= $is_subscribed_to_subscriber ? ' Отписаться ' : ' Подписаться '; ?>
                                             </a>
                                         </div>

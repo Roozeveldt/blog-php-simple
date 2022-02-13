@@ -7,12 +7,15 @@ if (!isset($_SESSION['user'])) {
     exit();
 } else {
     $cur_user_id = $_SESSION['user']['id'];
+    $cur_user_login = $_SESSION['user']['login'];
+    $cur_user_userpic = $_SESSION['user']['userpic'];
 }
 
 require_once('functions.php');
+require_once('validation.php');
 
 $input = filter_input_array(INPUT_GET);
-$active_tab = empty($input['tab']) ? 'posts' : $input['tab'];
+$tab = empty($input['tab']) ? 'posts' : $input['tab'];
 $params = [];
 
 if ($input) {
@@ -34,36 +37,39 @@ if ($input) {
                     users.id = ?";
             $user = selectRow($conn, $sql, [$user_id, $user_id, $user_id]);
             $sql = "SELECT
-                    posts.id,
-                    posts.heading,
-                    posts.content,
-                    posts.quote_author,
-                    posts.author_id,
-                    users.login AS author_login,
-                    users.userpic AS author_userpic,
-                    posts.tag_ids,
-                    posts.reposts_count,
-                    posts.is_reposted,
-                    posts.created_at,
-                    posts.updated_at,
-                    types.type,
-                    (SELECT COUNT(id) FROM likes WHERE post_id = posts.id) AS likes_count
-                FROM
-                    posts
-                INNER JOIN
-                    types
-                ON
-                    types.id = posts.type_id
-                LEFT JOIN
-                    users
-                ON
-                    users.id = posts.author_id
-                WHERE
-                    user_id = ?
-                ORDER BY
-                    posts.created_at DESC";
+                        posts.id,
+                        posts.heading,
+                        posts.content,
+                        posts.quote_author,
+                        posts.user_id,
+                        posts.author_id,
+                        users.login AS author_login,
+                        users.userpic AS author_userpic,
+                        posts.tag_ids,
+                        posts.reposts_count,
+                        posts.is_reposted,
+                        posts.created_at,
+                        posts.updated_at,
+                        types.type,
+                        (SELECT COUNT(id) FROM likes WHERE post_id = posts.id) AS likes_count,
+                        (SELECT COUNT(id) FROM comments WHERE post_id = posts.id) AS comments_count
+                    FROM
+                        posts
+                    INNER JOIN
+                        types
+                    ON
+                        types.id = posts.type_id
+                    LEFT JOIN
+                        users
+                    ON
+                        users.id = posts.author_id
+                    WHERE
+                        user_id = ?
+                    ORDER BY
+                        posts.created_at DESC";
             $posts = selectRows($conn, $sql, [$user_id]);
             foreach ($posts as $post) {
+                $posts[$post['id']]['show_comments'] = false;
                 if (!empty($post['tag_ids'])) {
                     $stmt = db_get_prepare_stmt($conn, "SELECT id, name FROM tags WHERE id IN ({$post['tag_ids']})");
                     mysqli_stmt_execute($stmt);
@@ -76,7 +82,7 @@ if ($input) {
                     $posts[$post['id']]['tags'] = $arr;
                 }
             }
-            $params[$k] = $user_id;
+            $params[$k] = $v;
         }
         if ($k == 'tab') {
             switch ($v) {
@@ -190,6 +196,33 @@ if ($input) {
                     repost($cur_user_id, $post_id);
                     header("Location: " . PATH . "/profile.php?id=" . $cur_user_id);
                     exit();
+                case 'show_comments':
+                    $post_id = filter_input(INPUT_GET, 'post_id', FILTER_SANITIZE_NUMBER_INT);
+                    $sql = "SELECT
+                            comments.id,
+                            comments.content,
+                            comments.user_id,
+                            comments.created_at,
+                            users.login,
+                            users.userpic
+                        FROM
+                            comments
+                        INNER JOIN
+                            users
+                        ON
+                            users.id = comments.user_id
+                        WHERE
+                            comments.post_id = ?
+                        ORDER BY
+                            comments.created_at DESC";
+                    if (!(isset($input['show']) && $input['show'] == 'all')) {
+                        $sql .= " LIMIT " . COMMENTS_LIMIT;
+                    }
+                    $comments = selectRows($conn, $sql, [$post_id]);
+                    $posts[$post_id]['show_comments'] = true;
+                    $posts[$post_id]['comments'] = $comments;
+                    $params[$k] = $v;
+                    break;
                 default:
                     break;
             }
@@ -197,7 +230,24 @@ if ($input) {
     }
 }
 
-$url = "/" . pathinfo(__FILE__, PATHINFO_BASENAME) . "?" . http_build_query($params);
+// добавление комментария
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $getPostVal = [];
+    foreach ($_POST as $key => $value) {
+        $getPostVal[$key] = getPostVal($key);
+    }
+
+    $errors = validate_post_form($_POST, $comment_rules);
+
+    if (!empty($errors)) {
+        $errors['comment_form_id'] = $_POST['comment_form'];
+    } else {
+        $user_id = (int)$_POST['user_id'];
+        insert_comment_into_db($conn, $_POST, $cur_user_id);
+        header("Location: " . PATH . "/profile.php?id=" . $user_id);
+        exit();
+    }
+}
 
 if (!isset($user)) {
     $main_content = include_template('404.php');
@@ -210,50 +260,20 @@ if (!isset($user)) {
         'footer' => include_template('footer.php'),
     ]);
 } else {
-    /* switch ($post['type']) {
-        case 'quote':
-            $post_content = include_template('post-quote.php', [
-                'text' => $post['content'],
-                'author' => $post['quote_author'],
-            ]);
-            break;
-        case 'link':
-            $post_content = include_template('post-link.php', [
-                'title' => $post['heading'],
-                'url' => $post['content'],
-            ]);
-            break;
-        case 'text':
-            $post_content = include_template('post-text.php', [
-                'text' => $post['content'],
-            ]);
-            break;
-        case 'photo':
-            $post_content = include_template('post-photo.php', [
-                'alt' => $post['heading'],
-                'img_url' => $post['content'],
-            ]);
-            break;
-        case 'video':
-            $post_content = include_template('post-video.php', [
-                'youtube_url' => $post['content'],
-            ]);
-            break;
-        default:
-            $post_content = 'Шаблон не найден!';
-            break;
-    } */
-
     $main_content = include_template('profile.php', [
-        'tab' => $tab ?? $active_tab,
-        'url' => $url,
+        'tab' => $tab,
         'user' => $user,
-        'cur_user' => $cur_user_id,
+        'cur_user_id' => $cur_user_id,
+        'cur_user_login' => $cur_user_login,
+        'cur_user_userpic' => $cur_user_userpic,
+        'params' => $params,
         'is_subscribed' => is_subscribed($cur_user_id, $user_id),
         'posts' => $posts ?? [],
         'likes' => $likes ?? [],
         'subscriptions' => $subscriptions ?? [],
         'subscribers' => $subscribers ?? [],
+        'errors' => $errors ?? [],
+        'getPostVal' => $getPostVal ?? [],
     ]);
 
     $layout_content = include_template('layout.php', [

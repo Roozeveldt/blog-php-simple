@@ -107,7 +107,7 @@
                                 </div>
                                 <footer class="post__footer post__indicators">
                                     <div class="post__buttons">
-                                        <a class="post__indicator post__indicator--likes button" href="<?= $url; ?>do=like&post_id=<?= $post['id']; ?>" title="Лайк">
+                                        <a class="post__indicator post__indicator--likes button" href="?do=like&post_id=<?= $post['id']; ?>" title="Лайк">
                                             <svg class="post__indicator-icon" width="20" height="17">
                                                 <use xlink:href="#icon-heart"></use>
                                             </svg>
@@ -124,7 +124,7 @@
                                             <span><?= $post['comments_count']; ?></span>
                                             <span class="visually-hidden">количество комментариев</span>
                                         </a>
-                                        <a class="post__indicator post__indicator--repost button" href="<?= $url; ?>do=repost&post_id=<?= $post['id']; ?>" title="Репост">
+                                        <a class="post__indicator post__indicator--repost button" href="?do=repost&post_id=<?= $post['id']; ?>" title="Репост">
                                             <svg class="post__indicator-icon" width="19" height="17">
                                                 <use xlink:href="#icon-repost"></use>
                                             </svg>
@@ -147,13 +147,13 @@
             </div>
             <ul class="feed__filters filters">
                 <li class="feed__filters-item filters__item">
-                    <a class="filters__button <?php if ($tab == '') : ?>filters__button--active<?php endif; ?>" href="/">
+                    <a class="filters__button <?php if ($type == 'all') : ?>filters__button--active<?php endif; ?>" href="?<?= http_build_query(array_merge(['type' => 'all'])); ?>">
                         <span>Все</span>
                     </a>
                 </li>
                 <?php foreach ($types as $type) : ?>
                     <li class="feed__filters-item filters__item">
-                        <a class="filters__button filters__button--<?= $type['type']; ?> <?php if ($tab == $type['type']) : ?>filters__button--active<?php endif; ?> button" href="<?= $url; ?>type=<?= $type['type']; ?>">
+                        <a class="filters__button filters__button--<?= $type['type']; ?> <?php if ($type == $type['type']) : ?>filters__button--active<?php endif; ?> button" href="?<?= http_build_query(array_merge(['type' => $type['type']])); ?>">
                             <span class="visually-hidden"><?= $type['name']; ?></span>
                             <svg class="filters__icon" width="24" height="24">
                                 <use xlink:href="#icon-filter-<?= $type['type']; ?>"></use>

@@ -13,7 +13,8 @@ require_once('functions.php');
 require_once('types.php');
 
 $input = filter_input_array(INPUT_GET);
-$tab = empty($input['type']) ? '' : $input['type'];
+$type = empty($input['type']) ? 'all' : $input['type'];
+$sql_data = [$cur_user_id];
 
 $sql = "SELECT
             posts.id AS id,
@@ -44,9 +45,6 @@ $sql = "SELECT
             user_id IN (SELECT subscriptions.user_id FROM subscriptions WHERE subscriber_id = ?)
 ";
 
-$sql_data = [$cur_user_id];
-$params = [];
-
 if ($input) {
     foreach ($input as $k => $v) {
         if ($k == 'type') {
@@ -76,8 +74,6 @@ if ($input) {
 $sql .= " ORDER BY posts.created_at DESC";
 $posts = selectRows($conn, $sql, $sql_data);
 
-$url = "/" . pathinfo(__FILE__, PATHINFO_BASENAME) . "?" . http_build_query($params);
-
 if ($posts) {
     foreach ($posts as $post) {
         if (!empty($post['tag_ids'])) {
@@ -96,8 +92,7 @@ if ($posts) {
 }
 
 $main_content = include_template('feed.php', [
-    'url' => $url,
-    'tab' => $tab,
+    'type' => $type,
     'types' => $types,
     'posts' => $posts ?? [],
 ]);

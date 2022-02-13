@@ -176,7 +176,6 @@ if (!isset($post)) {
         'params' => $params,
         'post' => $post,
         'post_content' => $post_content,
-        'cur_user' => $cur_user_id,
         'cur_user_login' => $cur_user_login,
         'cur_user_userpic' => $cur_user_userpic,
         'is_subscribed' => is_subscribed($cur_user_id, $user_id),
