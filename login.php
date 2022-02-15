@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     'Вы ввели неверный логин и/или пароль',
                 ];
             } else {
-                foreach($user as $key => $value) {
+                foreach ($user as $key => $value) {
                     if ($key != 'password') {
                         $_SESSION['user'][$key] = $value;
                     }

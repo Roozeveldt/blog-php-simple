@@ -8,5 +8,8 @@
 Thumbs.db
 vendor
 pages
+sql
+js
+libs/dropzone.js
 uploads/*
 !uploads/.gitkeep

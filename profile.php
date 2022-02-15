@@ -278,6 +278,7 @@ if (!isset($user)) {
 
     $layout_content = include_template('layout.php', [
         'header' => include_template('header.php', [
+            'count_new_messages' => count_new_messages($cur_user_id),
             'title' => 'readme: Профиль пользователя ' . $user['login'],
         ]),
         'content' => $main_content,

@@ -13,8 +13,11 @@ require_once('functions.php');
 require_once('types.php');
 
 $input = filter_input_array(INPUT_GET);
-$type = empty($input['type']) ? 'all' : $input['type'];
+
+$default_type = 'all';
+$tab = empty($input['type']) ? $default_type : h($input['type']);
 $sql_data = [$cur_user_id];
+$params['type'] = $default_type;
 
 $sql = "SELECT
             posts.id AS id,
@@ -47,9 +50,10 @@ $sql = "SELECT
 
 if ($input) {
     foreach ($input as $k => $v) {
-        if ($k == 'type') {
+        if ($k == 'type' && $v !== 'all') {
             $type = filter_input(INPUT_GET, 'type', FILTER_SANITIZE_SPECIAL_CHARS);
             $sql .= " AND type_id = (SELECT types.id FROM types WHERE types.type = ?)";
+            $params[$k] = $type;
             array_push($sql_data, $type);
         }
         if ($k == 'do') {
@@ -92,13 +96,15 @@ if ($posts) {
 }
 
 $main_content = include_template('feed.php', [
-    'type' => $type,
+    'tab' => $tab,
+    'params' => $params,
     'types' => $types,
     'posts' => $posts ?? [],
 ]);
 
 $layout_content = include_template('layout.php', [
     'header' => include_template('header.php', [
+        'count_new_messages' => count_new_messages($cur_user_id),
         'title' => 'readme: Моя лента',
     ]),
     'content' => $main_content,

@@ -123,13 +123,13 @@
                                     </div>
                                     <div class="post__info">
                                         <b class="post__author-name"><?= $post['login']; ?></b>
-                                        <time class="post__time" datetime="<?= date("c", strtotime($post['created_at'])); ?>; ?>" title="<?= date("d.m.Y H:i", strtotime($post['created_at'])); ?>"><?= getRelativePostDate($post['created_at']); ?></time>
+                                        <time class="post__time" datetime="<?= date("c", strtotime($post['created_at'])); ?>" title="<?= date("d.m.Y H:i", strtotime($post['created_at'])); ?>"><?= getRelativePostDate($post['created_at']); ?></time>
                                     </div>
                                 </a>
                             </div>
                             <div class="post__indicators">
                                 <div class="post__buttons">
-                                    <a class="post__indicator post__indicator--likes button" href="?do=like&post_id=<?= $post['id']; ?>" title="Лайк">
+                                    <a class="post__indicator post__indicator--likes button" href="?<?= http_build_query(array_merge($params, ['do' => 'like', 'post_id' => $post['id']])); ?>" title="Лайк">
                                         <svg class="post__indicator-icon" width="20" height="17">
                                             <use xlink:href="#icon-heart"></use>
                                         </svg>

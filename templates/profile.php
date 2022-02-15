@@ -27,7 +27,7 @@
                         <?= $is_subscribed ? ' Отписаться ' : ' Подписаться '; ?>
                     </a>
                     <?php if ($is_subscribed) : ?>
-                        <a class="profile__user-button user__button user__button--writing button button--green" href="messages.php">Сообщение</a>
+                        <a class="profile__user-button user__button user__button--writing button button--green" href="messages.php?user_id=<?= $user['id']; ?>">Сообщение</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                         <h2 class="visually-hidden">Публикации</h2>
                         <?php if (is_array($posts) && !empty($posts)) : ?>
                             <?php foreach ($posts as $post) : ?>
-                                <article class="profile__post post post-<?= $post['type']; ?>">
+                                <article id="post-<?= $post['id']; ?>" class="profile__post post post-<?= $post['type']; ?>">
                                     <header class="post__header">
                                         <?php if ($post['is_reposted']) : ?>
                                             <div class="post__author" style="padding-bottom: 0;">
@@ -144,7 +144,7 @@
                                     <footer class="post__footer">
                                         <div class="post__indicators">
                                             <div class="post__buttons">
-                                                <a class="post__indicator post__indicator--likes button" href="?<?= http_build_query(array_merge(['do' => 'like', 'post_id' => $post['id']])); ?>" title="Лайк">
+                                                <a class="post__indicator post__indicator--likes button" href="?<?= http_build_query(array_merge(['do' => 'like', 'post_id' => $post['id']])); ?>#post-<?= $post['id']; ?>" title="Лайк">
                                                     <svg class="post__indicator-icon" width="20" height="17">
                                                         <use xlink:href="#icon-heart"></use>
                                                     </svg>

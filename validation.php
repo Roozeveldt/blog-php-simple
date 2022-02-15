@@ -33,6 +33,18 @@ $comment_rules = [
     },
 ];
 
+$message_rules = [
+    'content' => function () {
+        return validate_message_field('content');
+    },
+    'receiver_id' => function () {
+        return validate_message_field('receiver_id');
+    },
+    'sender_id' => function () {
+        return validate_message_field('sender_id');
+    },
+];
+
 $signin_rules = [
     'email' => function () {
         return validate_signin_field('email');

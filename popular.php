@@ -61,8 +61,8 @@ if ($input) {
             $where = " WHERE type_id = (SELECT types.id FROM types WHERE types.type = ?)";
             $sql .= $where;
             $sql_count .= $where;
-            $params[$k] = $type;
             array_push($sql_data, $type);
+            $params[$k] = $v;
         }
         if ($k == 'sort') {
             $sort = $v;
@@ -120,6 +120,7 @@ $main_content = include_template('popular.php', [
 
 $layout_content = include_template('layout.php', [
     'header' => include_template('header.php', [
+        'count_new_messages' => count_new_messages($cur_user_id),
         'title' => 'readme: Популярное',
     ]),
     'content' => $main_content,

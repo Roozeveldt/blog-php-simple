@@ -201,6 +201,29 @@ function getRelativePostDate(string $post_date) : string
     return $time . " " . $str . " назад";
 }
 
+function getRelativeLastMessageTime(string $date) : string
+{
+    $months = ['янв', 'фев', 'мар', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+
+    $cur_tstmp = strtotime('now');
+    $msg_tstmp = strtotime($date);
+    $diff = $cur_tstmp - $msg_tstmp;
+
+    switch ($diff) {
+
+        // часы - если до текущего времени прошло меньше 24 часов, то формат будет вида «00:15»
+        case ($diff >= 0 && $diff < (24 * 3600)):
+            $str = date("H:i", strtotime($date));
+            break;
+
+        default:
+            $str = date("d " . $months[date("n") - 1], strtotime($date));
+            break;
+    }
+
+    return $str;
+}
+
 /**
  * Возвращает корректную форму множественного числа
  * Ограничения: только для целых чисел
@@ -382,6 +405,20 @@ function selectRow($link, $sql, $data)
     $result = mysqli_stmt_get_result($stmt);
 
     return mysqli_fetch_assoc($result);
+}
+
+function selectRowsID($link, $sql, $data = [])
+{
+    $stmt = db_get_prepare_stmt($link, $sql, $data);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    $arr = [];
+    foreach ($rows as $row) {
+        $arr[$row['id']] = $row['id'];
+    }
+
+    return $arr;
 }
 
 function displayUserRegistrationPeriod(string $date) : string
@@ -971,6 +1008,56 @@ function validate_comment_field($name)
     }
 }
 
+function validate_message_field($name)
+{
+    $messages = [
+        'content' => [
+            'required' => [
+                'Ошибка валидации',
+                'Это поле должно быть заполнено.',
+            ],
+            'too_short' => [
+                'Ошибка валидации',
+                'Длина комментария должна быть больше четырех символов.',
+            ],
+        ],
+        'receiver_id' => [
+            'user_not_found' => [
+                'Ошибка валидации',
+                'Получатель сообщения не существует.',
+            ],
+        ],
+        'sender_id' => [
+            'receiver_the_same' => [
+                'Ошибка валидации',
+                'Нелья отправить сообщение самому себе.',
+            ],
+        ],
+    ];
+
+    if (empty($_POST[$name])) {
+        return $messages[$name]['required'];
+    }
+
+    if ($name == 'content') {
+        if (mb_strlen(trim($_POST[$name])) <= 4) {
+            return $messages[$name]['too_short'];
+        }
+    }
+
+    if ($name == 'receiver_id') {
+        if (!is_user_exists($_POST[$name])) {
+            return $messages[$name]['user_not_found'];
+        }
+    }
+
+    if ($name == 'sender_id') {
+        if ($_POST[$name] == $_POST['receiver_id']) {
+            return $messages[$name]['receiver_the_same'];
+        }
+    }
+}
+
 /**
  * Проверяет поля формы логина
  *
@@ -1417,6 +1504,27 @@ function insert_comment_into_db($conn, $post, $user_id)
     return true;
 }
 
+function insert_message_into_db($conn, $post)
+{
+    $data = [
+        'content' => h($post['content']),
+        'sender_id' => (int)$post['sender_id'],
+        'receiver_id' => (int)$post['receiver_id'],
+    ];
+
+    $sql = "INSERT INTO messages (
+                content,
+                sender_id,
+                receiver_id
+            ) VALUES (?, ?, ?)";
+
+    $stmt = db_get_prepare_stmt($conn, $sql, $data);
+    mysqli_stmt_execute($stmt);
+    send_message_notification($data['receiver_id'], $data['sender_id']);
+
+    return true;
+}
+
 function show_user_name(string $name) : string
 {
     $arr = explode(' ', $name);
@@ -1471,6 +1579,8 @@ function subscribe_to_user(int $subscriber_id, int $user_id)
     $stmt = db_get_prepare_stmt($conn, $sql, [$subscriber_id, $user_id]);
     mysqli_stmt_execute($stmt);
     send_subscription_notification($subscriber_id, $user_id);
+
+    return true;
 }
 
 function unsubscribe_from_user(int $id)
@@ -1484,6 +1594,8 @@ function unsubscribe_from_user(int $id)
     ";
     $stmt = db_get_prepare_stmt($conn, $sql, [$id]);
     mysqli_stmt_execute($stmt);
+
+    return true;
 }
 
 /**
@@ -1497,6 +1609,15 @@ function is_post_exists(int $post_id) : bool
     global $conn;
     $sql = "SELECT id FROM posts WHERE id = ?";
     $result = selectRow($conn, $sql, [$post_id]);
+
+    return $result ? true : false;
+}
+
+function is_user_exists(int $user_id) : bool
+{
+    global $conn;
+    $sql = "SELECT id FROM users WHERE id = ?";
+    $result = selectRow($conn, $sql, [$user_id]);
 
     return $result ? true : false;
 }
@@ -1672,8 +1793,42 @@ function send_subscription_notification(int $subscriber_id, int $user_id)
     }
 }
 
+function send_message_notification(int $receiver_id, int $sender_id)
+{
+    global $conn;
+    global $mailer;
+
+    // Create a message
+    $message = new Swift_Message();
+    $message->setFrom([
+        SenderEmail => SenderName,
+    ]);
+
+    try {
+        $sql = "SELECT login, email FROM users WHERE id = ?";
+        $receiver = selectRow($conn, $sql, [$receiver_id]);
+
+        $sql = "SELECT id, login FROM users WHERE id = ?";
+        $sender = selectRow($conn, $sql, [$sender_id]);
+
+        $message->setTo([$receiver['email'] => $receiver['login']]);
+        $message->setSubject($receiver['login'] . ', у вас новое сообщение от ' . $sender['login']);
+
+        $body = include_template('/mail/new-message.php', [
+            'receiver' => $receiver['login'],
+            'sender' => $sender['login'],
+            'sender_id' => $sender['id'],
+        ]);
+
+        $message->setBody($body, 'text/html');
+        $mailer->send($message);
+    } catch (Exception $exception) {
+        throw $exception;
+    }
+}
+
 /**
- * Отправляем уведомления подпичикам о новом посте пользователя, на которого они подписаны
+ * Отправляем уведомления подписчикам о новом посте пользователя, на которого они подписаны
  *
  * @param integer $author_id
  * @param integer $post_id
@@ -1716,4 +1871,66 @@ function send_post_notification(int $author_id, int $post_id)
     } catch (Exception $exception) {
         throw $exception;
     }
+}
+
+function is_receiver_new(int $sender_id, int $receiver_id)
+{
+    global $conn;
+
+    $sql = "SELECT
+                id
+            FROM
+                messages
+            WHERE
+                sender_id = ?
+            AND
+                receiver_id = ?
+            UNION
+            SELECT
+                id
+            FROM
+                messages
+            WHERE
+                sender_id = ?
+            AND
+                receiver_id = ?
+    ";
+    $result = selectRow($conn, $sql, [$sender_id, $receiver_id, $receiver_id, $sender_id]);
+
+    return ($result === null) ? true : false;
+}
+
+function count_new_messages(int $user_id)
+{
+    global $conn;
+
+    $sql = "SELECT
+                COUNT(id) AS id
+            FROM
+                messages
+            WHERE
+                receiver_id = ?
+            AND
+                is_new = '1'
+    ";
+    $row = selectRow($conn, $sql, [$user_id]);
+
+    return $row['id'];
+}
+
+function set_messages_as_read(int $sender_id, int $receiver_id)
+{
+    global $conn;
+
+    $sql = "UPDATE
+                messages
+            SET
+                is_new = '0'
+            WHERE
+                sender_id = ?
+            AND
+                receiver_id = ?
+    ";
+    $stmt = db_get_prepare_stmt($conn, $sql, [$sender_id, $receiver_id]);
+    mysqli_stmt_execute($stmt);
 }
