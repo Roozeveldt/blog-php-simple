@@ -15,3 +15,5 @@ jobs:
       - run: mkdir "$HOME/.ssh"
       - run: echo "$" > "$HOME/.ssh/key"
       - run: chmod 600 "$HOME/.ssh/key"
+      # Deploy
+      - run: rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete . marchello@s107.webhost1.ru:/var/www/marchello/data/www/blog.pmgu
